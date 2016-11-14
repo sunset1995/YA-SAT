@@ -21,19 +21,24 @@ void helpMessage() {
     puts("  -no-brain: use no brain recursive brute force");
 }
 
+bool checkAssignment() {
+    for(auto &cls : clauses) {
+        bool clsSat = false;
+        for(auto &v : cls)
+            if( (v > 0 && assignment[v]) ||
+                    (v < 0 && !assignment[-v]) ) {
+                clsSat = true;
+                break;
+            }
+        if( !clsSat ) return false;
+    }
+    return true;
+}
+
 void noBrain(int id) {
     if( id > maxVarIndex ) {
-        for(auto &cls : clauses) {
-            bool clsSat = false;
-            for(auto &v : cls)
-                if( (v > 0 && assignment[v]) ||
-                        (v < 0 && !assignment[-v]) ) {
-                    clsSat = true;
-                    break;
-                }
-            if( !clsSat ) return;
-        }
-        assignment[0] = true;
+        if( checkAssignment() )
+            assignment[0] = true;
         return;
     }
     assignment[id] = false;
