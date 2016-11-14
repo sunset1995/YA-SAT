@@ -1,3 +1,10 @@
+# My own files
+*.doc
+*.docx
+.DS_Store
+benchmarks
+yasat
+
 # Compiled Object files
 *.slo
 *.lo
