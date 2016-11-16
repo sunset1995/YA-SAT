@@ -48,7 +48,7 @@ public:
         return stk[idx[id]].val;
     }
     inline void set(int id, int val, int lv) {
-        fprintf(stderr, "set %d = %d@%d\n", id, val, lv);
+        //fprintf(stderr, "set %d = %d@%d\n", id, val, lv);
         ++top;
         stk[top].var = id;
         stk[top].val = val;
@@ -56,7 +56,7 @@ public:
         idx[id] = top;
     }
     inline void backToLevel(int lv) {
-        fprintf(stderr, "backToLevel %d\n", lv);
+        //fprintf(stderr, "backToLevel %d\n", lv);
         top = level[lv];
     }
 };
