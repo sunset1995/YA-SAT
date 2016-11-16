@@ -11,7 +11,7 @@ void helpMessage() {
     puts("./yasat [options] testcase.cnf");
     puts("");
     puts("options: ");
-    puts("  -no-brain: use no brain recursive brute force");
+    puts("  -statistic: print statitic result to stderr");
 }
 
 
@@ -22,12 +22,16 @@ int main(int argc, const char *argv[]) {
     }
 
     solver yasat;
+    bool statistic = false;
 
     // Parse input parameter
     for(int i=1, init=false; i<argc; ++i)
         if( argv[i][0] != '-' && !init ) {
             init = true;
             yasat.init(argv[i]);
+        }
+        else if( strcmp(argv[i], "-statistic") ) {
+            statistic = true;
         }
         else {
             helpMessage();
@@ -39,11 +43,18 @@ int main(int argc, const char *argv[]) {
 
 
     // Print result
-    if( yasat.assignment[0] ) {
+    if( statistic ) {
+        fprintf(stderr, "================ statistic ================\n");
+        fprintf(stderr, "Time on SAT solver: %.3f sec\n", yasat.statistic.elapseTime());
+        fprintf(stderr, "Backtrack num: %d\n", yasat.statistic.backtrackNum);
+        fprintf(stderr, "===========================================\n");
+    }
+
+    if( yasat.sat ) {
         puts("s SATISFIABLE");
         putchar('v');
         for(int i=1; i<=yasat.maxVarIndex; ++i)
-            printf(" %d", yasat.assignment[i] ? i : -i);
+            printf(" %d", yasat.var.getVal(i) ? i : -i);
         puts(" 0");
     }
     else {
