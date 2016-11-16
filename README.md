@@ -16,6 +16,7 @@ I implement _two literal watching_ before recursive. So even the simplest versio
 
 ### Elapsed time
 Only time on SAT solver's solve function is counted, excluding parsing time, init time.  
+
 | Scale | # instances | Simple(avg/max) |
 | ---- | ----: | ----: |
 | sat/sanity | 2 | 0/0 |
@@ -29,7 +30,7 @@ Only time on SAT solver's solve function is counted, excluding parsing time, ini
 | unsat/75-325 | 100 | 0.015/0.051 |
 | sat/100-430 | 1000 | 0.075/1.208 |
 | unsat/100-430 | 1000 | 0.208/2.443 |
-| sat/125-538 | 100 | 0.975/0.521 |
+| sat/125-538 | 100 | 0.975/20.521 |
 | unsat/125-538 | 100 | 2.294/12.759 |
 
 ### Backtrack num
@@ -46,4 +47,5 @@ Only time on SAT solver's solve function is counted, excluding parsing time, ini
 | unsat/75-325 | 4719/17045 |
 | sat/100-430 | 20742/352322 |
 | unsat/100-430 | 60768/848845 |
-| sat/125-538 | 534588/2672851 |
+| sat/125-538 | 243397/5123539 |
+| unsat/125-538 | 534588/2672851 |
