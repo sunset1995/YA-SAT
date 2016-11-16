@@ -18,7 +18,7 @@ void helpMessage() {
 int main(int argc, const char *argv[]) {
     if( argc < 2 ) {
         helpMessage();
-        exit(0);
+        exit(1);
     }
 
     solver yasat;
@@ -35,7 +35,7 @@ int main(int argc, const char *argv[]) {
         }
         else {
             helpMessage();
-            exit(0);
+            exit(1);
         }
 
 
