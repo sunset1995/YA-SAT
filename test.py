@@ -48,9 +48,9 @@ for dirname, dirnames, filenames in os.walk(sys.argv[1]):
 print('=============================')
 print('SAT', SAT, '/ UNSAT', UNSAT, '/ ERROR', ERROR)
 print('\nTime for SAT Solver')
-print('   avg', TOTALTIME / TESTNUM, 'sec')
-print('   max', MAXTIME, 'sec')
+print('   avg %.3f sec' % (TOTALTIME / TESTNUM))
+print('   max %.3f sec' % (MAXTIME))
 print('\nBacktrack Num')
-print(' total', TOTALBACKTRACKNUM)
+print('   avg', int(TOTALBACKTRACKNUM/TESTNUM))
 print('   max', MAXBACKTRACKNUM)
 
