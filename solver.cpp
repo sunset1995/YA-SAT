@@ -51,8 +51,15 @@ void solver::init(const char *filename) {
         ++cid;
     }
 
-    for(auto lit : unit)
-        unsatAfterInit |= !set(abs(lit), lit>0);
+    dset.init(maxVarIndex+4);
+    for(auto &cls : clauses) {
+        int id = 0;
+        while( id<cls.size() && var.getVal(cls.getVar(id))!=2 )
+            ++id;
+        if( id == cls.size() ) continue;
+        for(int i=id+1; i<cls.size(); ++i)
+            dset.unionSet(cls.getVar(id), cls.getVar(i));
+    }
 
 }
 
@@ -132,23 +139,35 @@ bool solver::set(int id, bool val) {
 bool solver::solve(int mode) {
     statistic.init();
     if( unsatAfterInit ) return false;
-    if( mode == HEURISTIC_NO ) {
-        heuristicInit_no();
-        pickUnassignedVar = &solver::heuristic_static;
+
+    sat = true;
+    for(int i=1; i<=maxVarIndex && sat; ++i) {
+
+        if( dset.findRoot(i) != i ) continue;
+        
+        nowSetID = i;
+
+        if( mode == HEURISTIC_NO ) {
+            heuristicInit_no();
+            pickUnassignedVar = &solver::heuristic_static;
+        }
+        else if( mode == HEURISTIC_MOM ) {
+            heuristicInit_MOM();
+            pickUnassignedVar = &solver::heuristic_static;
+        }
+        else if( mode == HEURISTIC_JW ) {
+            heuristicInit_JW();
+            pickUnassignedVar = &solver::heuristic_static;
+        }
+        else {
+            fprintf(stderr, "Unknown solver mode\n");
+            exit(1);
+        }
+
+        nowLevel = 0;
+        sat &= _solve();
+
     }
-    else if( mode == HEURISTIC_MOM ) {
-        heuristicInit_MOM();
-        pickUnassignedVar = &solver::heuristic_static;
-    }
-    else if( mode == HEURISTIC_JW ) {
-        heuristicInit_JW();
-        pickUnassignedVar = &solver::heuristic_static;
-    }
-    else {
-        fprintf(stderr, "Unknown solver mode\n");
-        exit(1);
-    }
-    sat = _solve();
     statistic.stopTimer();
     return sat;
 }
@@ -212,8 +231,12 @@ void solver::heuristicInit_MOM() {
             else
                 ++scoreNeg[cls.getVar(i)];
     }
-    for(int i=1; i<=maxVarIndex; ++i)
-        score[i] = scorePos[i] + scoreNeg[i];
+    for(int i=1; i<=maxVarIndex; ++i) {
+        if( dset.sameSet(i, nowSetID) )
+            score[i] = scorePos[i] + scoreNeg[i];
+        else
+            score[i] = -1;
+    }
     sort(staticOrder.begin(), staticOrder.end(), [&score](const pii &l, const pii &r) {
         return score[l.first] > score[r.first];
     });
@@ -240,8 +263,12 @@ void solver::heuristicInit_JW() {
             else
                 scoreNeg[cls.getVar(i)] += clauseScore;
     }
-    for(int i=1; i<=maxVarIndex; ++i)
-        score[i] = scorePos[i] + scoreNeg[i];
+    for(int i=1; i<=maxVarIndex; ++i) {
+        if( dset.sameSet(i, nowSetID) )
+            score[i] = scorePos[i] + scoreNeg[i];
+        else
+            score[i] = -1;
+    }
     sort(staticOrder.begin(), staticOrder.end(), [&score](const pii &l, const pii &r) {
         return score[l.first] > score[r.first];
     });
@@ -252,7 +279,8 @@ void solver::heuristicInit_JW() {
 
 pair<int,int> solver::heuristic_static() {
     for(int i=staticOrderFrom; i<staticOrder.size(); ++i)
-        if( var.getVal(staticOrder[i].first)==2 ) {
+        if( var.getVal(staticOrder[i].first)==2 && 
+                dset.sameSet(staticOrder[i].first, nowSetID) ) {
             staticOrderFrom = i+1;
             return staticOrder[i];
         }

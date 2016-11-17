@@ -101,6 +101,33 @@ public:
 };
 
 
+class DisjointSet {
+public:
+    vector<int> root;
+    vector<int> sz;
+    inline void init(int n) {
+        root.resize(n);
+        sz.resize(n, 1);
+        for(int i=0; i<n; ++i)
+            root[i] = i;
+    }
+    int findRoot(int id) {
+        return id==root[id] ? id : (root[id] = findRoot(root[id]));
+    }
+    inline bool sameSet(int a, int b) {
+        return findRoot(a) == findRoot(b);
+    }
+    inline void unionSet(int a, int b) {
+        a = findRoot(a);
+        b = findRoot(b);
+        if( a!=b ) {
+            root[b] = a;
+            sz[a] += sz[b];
+        }
+    }
+};
+
+
 class solver {
 public:
     typedef pair<int,int> pii;
@@ -123,6 +150,8 @@ public:
     int maxVarIndex;
     vector<Clause> clauses;
     opStack var;
+    DisjointSet dset;
+    int nowSetID = 0;
 
 
     // Recursive level

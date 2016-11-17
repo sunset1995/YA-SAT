@@ -14,8 +14,8 @@ void helpMessage() {
     puts("  -statistic: print statitic result to stderr");
     puts("  -stdout   : print result to stdout instead of file");
     puts("  -no       : don't use any heuristic");
-    puts("  -mom      : use MOM branching heuristic");
-    puts("  -jw       : (default) use Jeroslaw-Wang branching heuristic");
+    puts("  -mom      : (default) use MOM branching heuristic");
+    puts("  -jw       : use Jeroslaw-Wang branching heuristic");
 }
 
 
@@ -27,7 +27,7 @@ int main(int argc, const char *argv[]) {
 
     solver yasat;
     bool statistic = false;
-    int mode = solver::HEURISTIC_JW;
+    int mode = solver::HEURISTIC_MOM;
 
     // Parse input parameter
     int srcid = 0, toStdout = 0;
