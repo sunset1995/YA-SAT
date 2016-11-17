@@ -46,7 +46,8 @@ int main(int argc, const char *argv[]) {
     if( statistic ) {
         fprintf(stderr, "================ statistic ================\n");
         fprintf(stderr, "Time on SAT solver: %.3f sec\n", yasat.statistic.elapseTime());
-        fprintf(stderr, "Backtrack num: %d\n", yasat.statistic.backtrackNum);
+        fprintf(stderr, "Backtrack num     : %d\n", yasat.statistic.backtrackNum);
+        fprintf(stderr, "Max depth         : %d\n", yasat.statistic.maxDepth);
         fprintf(stderr, "===========================================\n");
     }
 

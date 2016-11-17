@@ -12,9 +12,10 @@ using namespace std;
 
 struct Statistic {
     int backtrackNum = 0;
+    int maxDepth = 0;
     struct timeval start, end;
     inline void init() {
-        backtrackNum = 0;
+        backtrackNum = maxDepth = 0;
         gettimeofday(&start, 0);
         gettimeofday(&end, 0);
     }

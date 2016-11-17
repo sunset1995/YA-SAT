@@ -123,6 +123,7 @@ bool solver::solve() {
 }
 bool solver::solve(int nowAt) {
     ++nowLevel;
+    statistic.maxDepth = max(nowLevel, statistic.maxDepth);
     while( nowAt <= maxVarIndex && var.getVal(nowAt)!=2 )
         ++nowAt;
     if( nowAt > maxVarIndex ) {

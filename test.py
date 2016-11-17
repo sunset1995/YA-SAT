@@ -15,6 +15,8 @@ MAXTIME = 0
 TOTALTIME = 0
 MAXBACKTRACKNUM = 0
 TOTALBACKTRACKNUM = 0
+MAXDEPTH = 0
+TOTALDEPTH = 0
 
 for dirname, dirnames, filenames in os.walk(sys.argv[1]):
     for filename in filenames:
@@ -38,12 +40,16 @@ for dirname, dirnames, filenames in os.walk(sys.argv[1]):
         statistic = str(proc.stderr.read()).split('\\n')
         nowTime = float(re.findall('[-+]?\d*\.\d+|[-+]?\d+', statistic[1])[0])
         nowBacktrackNum = [int(v) for v in statistic[2].split() if v.isdigit()][0]
+        nowDepth = [int(v) for v in statistic[3].split() if v.isdigit()][0]
         print('Time for SAT solver', nowTime, 'sec')
         print('Backtrack Num', nowBacktrackNum)
+        print('Max depth', nowDepth)
         MAXTIME = max(MAXTIME, nowTime)
         TOTALTIME = TOTALTIME + nowTime
         MAXBACKTRACKNUM = max(MAXBACKTRACKNUM, nowBacktrackNum)
         TOTALBACKTRACKNUM = TOTALBACKTRACKNUM + nowBacktrackNum
+        MAXDEPTH = max(MAXDEPTH, nowDepth)
+        TOTALDEPTH = TOTALDEPTH + nowDepth
 
 print('=============================')
 print('SAT', SAT, '/ UNSAT', UNSAT, '/ ERROR', ERROR)
@@ -53,4 +59,6 @@ print('   max %.3f sec' % (MAXTIME))
 print('\nBacktrack Num')
 print('   avg', int(TOTALBACKTRACKNUM/TESTNUM))
 print('   max', MAXBACKTRACKNUM)
-
+print('\nMax Depth')
+print('   avg', int(TOTALDEPTH/TESTNUM))
+print('   max', MAXDEPTH)
