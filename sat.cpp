@@ -12,8 +12,9 @@ void helpMessage() {
     puts("");
     puts("options: ");
     puts("  -statistic: print statitic result to stderr");
-    puts("  -no: don't use any heuristic");
-    puts("  -mom: (default) use MOM branching heuristic");
+    puts("  -stdout   : print result to stdout instead of file");
+    puts("  -no       : don't use any heuristic");
+    puts("  -mom      : (default) use MOM branching heuristic");
 }
 
 
@@ -28,7 +29,7 @@ int main(int argc, const char *argv[]) {
     int mode = solver::HEURISTIC_MOM;
 
     // Parse input parameter
-    int srcid = 0;
+    int srcid = 0, toStdout = 0;
     for(int i=1, init=false; i<argc; ++i)
         if( argv[i][0] != '-' && !init ) {
             init = true;
@@ -37,6 +38,9 @@ int main(int argc, const char *argv[]) {
         }
         else if( strcmp(argv[i], "-statistic") == 0 ) {
             statistic = true;
+        }
+        else if( strcmp(argv[i], "-stdout") == 0 ) {
+            toStdout = 1;
         }
         else if( strcmp(argv[i], "-no") == 0 ) {
             mode = solver::HEURISTIC_NO;
@@ -65,6 +69,27 @@ int main(int argc, const char *argv[]) {
         fprintf(stderr, "Backtrack num     : %d\n", yasat.statistic.backtrackNum);
         fprintf(stderr, "Max depth         : %d\n", yasat.statistic.maxDepth);
         fprintf(stderr, "===========================================\n");
+    }
+
+    if( !toStdout ) {
+        fflush(stdout);
+        char filename[100];
+        strcpy(filename, argv[srcid]);
+        int len = strlen(filename);
+        if( len>=4  && filename[len-4]=='.' && filename[len-3] == 'c' && 
+                filename[len-2] == 'n' && filename[len-1]=='f' ) {
+            filename[len-3] = 's';
+            filename[len-2] = 'a';
+            filename[len-1] = 't';
+        }
+        else {
+            filename[len] = '.';
+            filename[len+1] = 's';
+            filename[len+2] = 'a';
+            filename[len+3] = 't';
+            filename[len+4] = '\0';
+        }
+        freopen(filename, "w", stdout);
     }
 
     if( yasat.sat ) {

@@ -25,7 +25,7 @@ for dirname, dirnames, filenames in os.walk(sys.argv[1]):
         TESTNUM = TESTNUM + 1
         print('=============================')
         print(os.path.join(dirname, filename))
-        proc = subprocess.Popen(['./yasat', '-statistic', os.path.join(dirname, filename)],
+        proc = subprocess.Popen(['./yasat', '-stdout', '-statistic', os.path.join(dirname, filename)],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,)
         proc.wait()
