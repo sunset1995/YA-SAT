@@ -14,6 +14,8 @@ bool satisfyAlready(const vector<int> &cls) {
 
 void solver::init(const char *filename) {
 
+    *this = solver();
+
     vector< vector<int> > tmp;
     parse_DIMACS_CNF(tmp, maxVarIndex, filename);
 
@@ -127,38 +129,98 @@ bool solver::set(int id, bool val) {
 
 }
 
-bool solver::solve() {
+bool solver::solve(int mode) {
     statistic.init();
     if( unsatAfterInit ) return false;
-    sat = solve(1);
+    if( mode == HEURISTIC_NO ) {
+        heuristicInit_no();
+        pickUnassignedVar = &solver::heuristic_no;
+    }
+    else if( mode == HEURISTIC_MOM ) {
+        heuristicInit_MOM();
+        pickUnassignedVar = &solver::heuristic_MOM;
+    }
+    else {
+        fprintf(stderr, "Unknown solver mode\n");
+        exit(1);
+    }
+    sat = _solve();
     statistic.stopTimer();
     return sat;
 }
-bool solver::solve(int nowAt) {
+bool solver::_solve() {
     ++nowLevel;
     statistic.maxDepth = max(nowLevel, statistic.maxDepth);
-    while( nowAt <= maxVarIndex && var.getVal(nowAt)!=2 )
-        ++nowAt;
-    if( nowAt > maxVarIndex ) {
+
+    int tmp = staticOrderFrom;
+    pii decision = (this->*pickUnassignedVar)();
+    int nowAt = decision.first;
+    int val = decision.second;
+
+    if( nowAt == -1 ) {
         --nowLevel;
         return true;
     }
 
-    if( !set(nowAt, true) || !solve(nowAt+1) )
+    if( !set(nowAt, val) || !_solve() )
         var.backToLevel(nowLevel-1);
     else {
         --nowLevel;
         return true;
     }
 
-    if( !set(nowAt, false) || !solve(nowAt+1) )
+    if( !set(nowAt, val ^ 1) || !_solve() )
         var.backToLevel(nowLevel-1);
     else {
         --nowLevel;
         return true;
     }
 
+    staticOrderFrom = tmp;
     ++statistic.backtrackNum;
     --nowLevel;
     return false;
+}
+
+
+void solver::heuristicInit_no() {
+    staticOrderFrom = 0;
+    staticOrder.resize(maxVarIndex);
+    for(int i=1; i<=maxVarIndex; ++i)
+        staticOrder[i-1] = {i, 1};
+}
+
+pair<int,int> solver::heuristic_no() {
+    for(int i=staticOrderFrom; i<staticOrder.size(); ++i)
+        if( var.getVal(staticOrder[i].first)==2 ) {
+            staticOrderFrom = i+1;
+            return staticOrder[i];
+        }
+    return {-1, 0};
+}
+
+void solver::heuristicInit_MOM() {
+    staticOrderFrom = 0;
+    staticOrder.resize(maxVarIndex);
+    vector<int> score(maxVarIndex + 4, 0);
+    for(int i=1; i<=maxVarIndex; ++i)
+        staticOrder[i-1] = {i, 1};
+    for(auto &cls : clauses) {
+        if( cls.size() > 3 )
+            continue;
+        for(int i=0; i<cls.size(); ++i)
+            ++score[cls.getVar(i)];
+    }
+    sort(staticOrder.begin(), staticOrder.end(), [&score](const pii &l, const pii &r) {
+        return score[l.first] > score[r.first];
+    });
+}
+
+pair<int,int> solver::heuristic_MOM() {
+    for(int i=staticOrderFrom; i<staticOrder.size(); ++i)
+        if( var.getVal(staticOrder[i].first)==2 ) {
+            staticOrderFrom = i+1;
+            return staticOrder[i];
+        }
+    return {-1, 0};
 }

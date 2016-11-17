@@ -12,6 +12,8 @@ void helpMessage() {
     puts("");
     puts("options: ");
     puts("  -statistic: print statitic result to stderr");
+    puts("  -no: don't use any heuristic");
+    puts("  -mom: (default) use MOM branching heuristic");
 }
 
 
@@ -23,23 +25,37 @@ int main(int argc, const char *argv[]) {
 
     solver yasat;
     bool statistic = false;
+    int mode = solver::HEURISTIC_MOM;
 
     // Parse input parameter
+    int srcid = 0;
     for(int i=1, init=false; i<argc; ++i)
         if( argv[i][0] != '-' && !init ) {
             init = true;
+            srcid = i;
             yasat.init(argv[i]);
         }
-        else if( strcmp(argv[i], "-statistic") ) {
+        else if( strcmp(argv[i], "-statistic") == 0 ) {
             statistic = true;
+        }
+        else if( strcmp(argv[i], "-no") == 0 ) {
+            mode = solver::HEURISTIC_NO;
+        }
+        else if( strcmp(argv[i], "-mom") == 0 ) {
+            mode = solver::HEURISTIC_MOM;
         }
         else {
             helpMessage();
             exit(1);
         }
 
+    if( !srcid ) {
+        helpMessage();
+        exit(1);
+    }
 
-    yasat.solve();
+
+    yasat.solve(mode);
 
 
     // Print result

@@ -106,6 +106,8 @@ public:
     typedef pair<int,int> pii;
     enum {
         INFINITE = 1023456789,
+        HEURISTIC_NO = 1011,
+        HEURISTIC_MOM = 1012,
     };
     struct WatcherInfo {
         int clsid, wid;
@@ -141,8 +143,8 @@ public:
 
     bool set(int var, bool val);
 
-    bool solve();
-    bool solve(int nowAt);
+    bool solve(int mode);
+    bool _solve();
 
 
     // 2 Literal Watching
@@ -163,6 +165,17 @@ public:
     inline bool eval(const WatcherInfo &info) const {
         return evalClauesWatchedLit(clauses[info.clsid], info.wid);
     }
+
+    // Branching Heuristic
+    int staticOrderFrom;
+    vector<pii> staticOrder;
+    pii (solver::*pickUnassignedVar)();
+
+    void heuristicInit_no();
+    pii heuristic_no();
+
+    void heuristicInit_MOM();
+    pii heuristic_MOM();
 };
 
 #endif
