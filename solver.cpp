@@ -256,7 +256,7 @@ void solver::heuristicInit_JW() {
     vector<long long> score(maxVarIndex + 4, 0);
     for(auto &cls : clauses) {
         if( cls.size() > 13 ) continue;
-        long long clauseScore = (1LL<<(cls.size()-13));
+        long long clauseScore = (1LL<<(13-cls.size()));
         for(int i=0; i<cls.size(); ++i)
             if( cls.getSign(i) )
                 scorePos[cls.getVar(i)] += clauseScore;
