@@ -1,6 +1,17 @@
 #include "solver.h"
 
 
+bool satisfyAlready(const vector<int> &cls) {
+    unordered_set<int> checker;
+    for(auto &v : cls) {
+        if( checker.find(-v) != checker.end() )
+            return true;
+        checker.insert(v);
+    }
+    return false;
+}
+
+
 void solver::init(const char *filename) {
 
     vector< vector<int> > tmp;
@@ -14,7 +25,7 @@ void solver::init(const char *filename) {
     for(auto &cls : tmp) {
         if( cls.empty() ) unsatAfterInit = 1;
         else if( cls.size() == 1 ) unit.emplace_back(cls[0]);
-        else {
+        else if( !satisfyAlready(cls) ) {
             clauses.push_back(Clause());
             clauses.back().watcher[0] = 0;
             clauses.back().watcher[1] = (cls.size() >> 1);
@@ -86,6 +97,8 @@ int solver::updateClauseWatcher(Clause &cls, int wid) {
 
 bool solver::set(int id, bool val) {   
 
+    if( var.getVal(id) != 2 )
+        return var.getVal(id) == val;
     var.set(id, val, nowLevel);
     vector<WatcherInfo> &lst = (val ? neg[id] : pos[id]);
     for(int i=lst.size()-1; i>=0; --i) {

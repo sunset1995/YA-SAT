@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <vector>
 #include <algorithm>
+#include <unordered_set>
 using namespace std;
 
 
@@ -40,7 +41,9 @@ public:
     vector<op> stk;
     int top = -1;
     opStack() {}
-    opStack(int n):idx(n), level(n), stk(n) {}
+    opStack(int n):idx(n), level(n), stk(n) {
+        level[0] = -1;
+    }
     inline bool notSet(int id) const {
         return idx[id] > top || stk[idx[id]].var != id;
     }
