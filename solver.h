@@ -108,6 +108,7 @@ public:
         INFINITE = 1023456789,
         HEURISTIC_NO = 1011,
         HEURISTIC_MOM = 1012,
+        HEURISTIC_JW = 1013,
     };
     struct WatcherInfo {
         int clsid, wid;
@@ -172,10 +173,9 @@ public:
     pii (solver::*pickUnassignedVar)();
 
     void heuristicInit_no();
-    pii heuristic_no();
-
     void heuristicInit_MOM();
-    pii heuristic_MOM();
+    void heuristicInit_JW();
+    pii heuristic_static();
 };
 
 #endif

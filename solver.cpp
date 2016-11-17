@@ -134,11 +134,15 @@ bool solver::solve(int mode) {
     if( unsatAfterInit ) return false;
     if( mode == HEURISTIC_NO ) {
         heuristicInit_no();
-        pickUnassignedVar = &solver::heuristic_no;
+        pickUnassignedVar = &solver::heuristic_static;
     }
     else if( mode == HEURISTIC_MOM ) {
         heuristicInit_MOM();
-        pickUnassignedVar = &solver::heuristic_MOM;
+        pickUnassignedVar = &solver::heuristic_static;
+    }
+    else if( mode == HEURISTIC_JW ) {
+        heuristicInit_JW();
+        pickUnassignedVar = &solver::heuristic_static;
     }
     else {
         fprintf(stderr, "Unknown solver mode\n");
@@ -190,33 +194,63 @@ void solver::heuristicInit_no() {
         staticOrder[i-1] = {i, 1};
 }
 
-pair<int,int> solver::heuristic_no() {
-    for(int i=staticOrderFrom; i<staticOrder.size(); ++i)
-        if( var.getVal(staticOrder[i].first)==2 ) {
-            staticOrderFrom = i+1;
-            return staticOrder[i];
-        }
-    return {-1, 0};
-}
-
 void solver::heuristicInit_MOM() {
     staticOrderFrom = 0;
     staticOrder.resize(maxVarIndex);
-    vector<int> score(maxVarIndex + 4, 0);
     for(int i=1; i<=maxVarIndex; ++i)
         staticOrder[i-1] = {i, 1};
+
+    vector<long long> scorePos(maxVarIndex + 4, 0);
+    vector<long long> scoreNeg(maxVarIndex + 4, 0);
+    vector<long long> score(maxVarIndex + 4, 0);
     for(auto &cls : clauses) {
         if( cls.size() > 3 )
             continue;
         for(int i=0; i<cls.size(); ++i)
-            ++score[cls.getVar(i)];
+            if( cls.getSign(i) )
+                ++scorePos[cls.getVar(i)];
+            else
+                ++scoreNeg[cls.getVar(i)];
     }
+    for(int i=1; i<=maxVarIndex; ++i)
+        score[i] = scorePos[i] + scoreNeg[i];
     sort(staticOrder.begin(), staticOrder.end(), [&score](const pii &l, const pii &r) {
         return score[l.first] > score[r.first];
     });
+    for(auto &v : staticOrder)
+        if( scoreNeg[v.first] > scorePos[v.first] )
+            v.second = 0;
 }
 
-pair<int,int> solver::heuristic_MOM() {
+void solver::heuristicInit_JW() {
+    staticOrderFrom = 0;
+    staticOrder.resize(maxVarIndex);
+    for(int i=1; i<=maxVarIndex; ++i)
+        staticOrder[i-1] = {i, 1};
+
+    vector<long long> scorePos(maxVarIndex + 4, 0);
+    vector<long long> scoreNeg(maxVarIndex + 4, 0);
+    vector<long long> score(maxVarIndex + 4, 0);
+    for(auto &cls : clauses) {
+        if( cls.size() > 13 ) continue;
+        long long clauseScore = (1LL<<(cls.size()-13));
+        for(int i=0; i<cls.size(); ++i)
+            if( cls.getSign(i) )
+                scorePos[cls.getVar(i)] += clauseScore;
+            else
+                scoreNeg[cls.getVar(i)] += clauseScore;
+    }
+    for(int i=1; i<=maxVarIndex; ++i)
+        score[i] = scorePos[i] + scoreNeg[i];
+    sort(staticOrder.begin(), staticOrder.end(), [&score](const pii &l, const pii &r) {
+        return score[l.first] > score[r.first];
+    });
+    for(auto &v : staticOrder)
+        if( scoreNeg[v.first] > scorePos[v.first] )
+            v.second = 0;
+}
+
+pair<int,int> solver::heuristic_static() {
     for(int i=staticOrderFrom; i<staticOrder.size(); ++i)
         if( var.getVal(staticOrder[i].first)==2 ) {
             staticOrderFrom = i+1;
