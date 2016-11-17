@@ -9,7 +9,8 @@ Yet Another SAT Solver. Term project of PACA.
     - `-stdout` print result to stdout instead of file  
     - `-no` don't use any heuristic  
     - `-mom` (default) use MOM branching heuristic  
-- To test all benchmarks, *.cnf, under directory `python3 test.py path`
+- To test all benchmarks, *.cnf, under directory `python3 test.py path`  
+- To validate the sat result `python3 validator.py benchmark.cnf benchmark.sat`  
 
 
 ## Result
