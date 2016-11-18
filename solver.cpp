@@ -51,6 +51,9 @@ void solver::init(const char *filename) {
         ++cid;
     }
 
+    for(auto lit : unit)
+        unsatAfterInit |= !set(abs(lit), lit>0);
+
     dset.init(maxVarIndex+4);
     for(auto &cls : clauses) {
         int id = 0;
