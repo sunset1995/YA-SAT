@@ -35,6 +35,7 @@ class opStack {
 public:
     struct op {
         int var, val;
+        int trie = -1, pickerInfo = 0;
     };
     vector<int> idx;
     vector<int> level;

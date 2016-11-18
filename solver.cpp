@@ -175,36 +175,48 @@ bool solver::solve(int mode) {
     return sat;
 }
 bool solver::_solve() {
-    ++nowLevel;
-    statistic.maxDepth = max(nowLevel, statistic.maxDepth);
 
-    int tmp = staticOrderFrom;
-    pii decision = (this->*pickUnassignedVar)();
-    int nowAt = decision.first;
-    int val = decision.second;
+    while( true ) {
 
-    if( nowAt == -1 ) {
-        --nowLevel;
-        return true;
+        opStack::op &now = var.stk[var.top+1];
+
+        if( now.trie == 2 ) {
+
+            // Backtracking
+            now.trie = -1;
+            staticOrderFrom = now.pickerInfo;
+            ++statistic.backtrackNum;
+            if( --nowLevel == 0 )
+                break;
+            var.backToLevel(nowLevel-1);
+            continue;
+
+        }
+
+        if( now.trie == -1 ) {
+
+            // Branching
+            ++nowLevel;
+            statistic.maxDepth = max(nowLevel, statistic.maxDepth);
+
+            now.pickerInfo = staticOrderFrom;
+            staticOrderFrom = 0;
+            pii decision = (this->*pickUnassignedVar)();
+            now.var = decision.first;
+            now.val = decision.second;
+            now.trie = 0;
+
+            if( now.var == -1 ) return true;
+
+        }
+
+        if( !set(now.var, now.val ^ (now.trie++)) )
+            var.backToLevel(nowLevel-1);
+        else
+            continue;
+
     }
 
-    if( !set(nowAt, val) || !_solve() )
-        var.backToLevel(nowLevel-1);
-    else {
-        --nowLevel;
-        return true;
-    }
-
-    if( !set(nowAt, val ^ 1) || !_solve() )
-        var.backToLevel(nowLevel-1);
-    else {
-        --nowLevel;
-        return true;
-    }
-
-    staticOrderFrom = tmp;
-    ++statistic.backtrackNum;
-    --nowLevel;
     return false;
 }
 
