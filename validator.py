@@ -6,6 +6,8 @@ assignment = set()
 with open(sys.argv[2]) as sat:
     assignment = set(str(sat.read()).split())
 
+assignment.remove('0')
+
 if 'UNSATISFIABLE' in assignment:
     print('UNSATISFIABLE')
     exit(0)
