@@ -153,6 +153,7 @@ public:
     opStack var;
     DisjointSet dset;
     int nowSetID = 0;
+    vector< vector<int> > v2c[2];
 
 
     // Recursive level
@@ -173,6 +174,11 @@ public:
     int updateClauseWatcher(Clause &cls, int wid);
 
     bool set(int var, bool val);
+    void backToLevel(int lv);
+    void onVarSet_JW(int id, int val);
+    void onVarReset_JW(int lv);
+    void (solver::*onVarSet)(int,int) = NULL;
+    void (solver::*onVarReset)(int) = NULL;
 
     bool solve(int mode);
     bool _solve();
@@ -200,12 +206,16 @@ public:
     // Branching Heuristic
     int staticOrderFrom;
     vector<pii> staticOrder;
-    pii (solver::*pickUnassignedVar)();
+    pii (solver::*pickUnassignedVar)() = NULL;
 
     void heuristicInit_no();
     void heuristicInit_MOM();
     void heuristicInit_JW();
     pii heuristic_static();
+    vector<long long> jwScore;
+    vector<int> clsFirstResolve;
+    vector< vector<int> > varFirstResolve;
+    pii heuristic_JW();
 };
 
 #endif
