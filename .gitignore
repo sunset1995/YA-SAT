@@ -4,6 +4,7 @@
 .DS_Store
 benchmarks
 yasat
+hornSatChecker
 preprocess.py
 report.pages
 report.pdf
