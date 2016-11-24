@@ -4,6 +4,11 @@
 .DS_Store
 benchmarks
 yasat
+preprocess.py
+report.pages
+report.pdf
+testsat.py
+testunsat.py
 
 # Compiled Object files
 *.slo
