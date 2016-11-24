@@ -10,9 +10,14 @@ Yet Another SAT Solver. Term project of PACA.
     - `-no` don't use any heuristic  
     - `-mom` (default) use MOM branching heuristic  
     - `-jw` use Jeroslaw-Wang branchgin heuristic
-- To test all benchmarks, *.cnf, under directory `python3 test.py path`  
+- To run all benchmarks in *.cnf under directory `python3 test.py path-to-directory`  
 - To validate the sat result `python3 validator.py benchmark.cnf benchmark.sat`  
-
+- To run all SAT benchmarks  
+    1. put all SAT benchmarks under `benchmarks/SAT/`  
+    2. run `python3 testsat.py`  
+- To run all UNSAT benchmarks  
+    1. put all UNSAT benchmarks under `benchmarks/UNSAT/`
+    2. run `python3 testunsat.py`
 
 ## Result
 Beside testcases provied by PACA, I also use online benchmark problems from [SATLIB](http://www.cs.ubc.ca/~hoos/SATLIB/benchm.html).  

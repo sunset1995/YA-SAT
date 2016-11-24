@@ -6,11 +6,7 @@ benchmarks
 yasat
 hornSatChecker
 preprocess.py
-report.pages
-report.pdf
-testsat.py
-testunsat.py
-course
+courses
 
 # Compiled Object files
 *.slo
