@@ -10,6 +10,7 @@ report.pages
 report.pdf
 testsat.py
 testunsat.py
+course
 
 # Compiled Object files
 *.slo
