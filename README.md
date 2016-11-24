@@ -1,6 +1,8 @@
 # YA-SAT
 Yet Another SAT Solver. Term project of PACA.
 
+Constraint propagation can really reduce backtrack time a lot, but too expensive to do it!!
+
 
 ## How to
 - To build `make clean && make`  
