@@ -8,8 +8,8 @@ Yet Another SAT Solver. Term project of PACA.
     - `-statistic` print statistic result to _stderr_  
     - `-stdout` print result to stdout instead of file  
     - `-no` don't use any heuristic  
-    - `-mom` use MOM branching heuristic  
-    - `-jw` (default) use Jeroslaw-Wang branchgin heuristic
+    - `-mom` (default) use MOM branching heuristic  
+    - `-jw` use Jeroslaw-Wang branchgin heuristic
 - To test all benchmarks, *.cnf, under directory `python3 test.py path`  
 - To validate the sat result `python3 validator.py benchmark.cnf benchmark.sat`  
 

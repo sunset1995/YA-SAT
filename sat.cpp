@@ -27,7 +27,7 @@ int main(int argc, const char *argv[]) {
 
     solver yasat;
     bool statistic = false;
-    int mode = solver::HEURISTIC_JW;
+    int mode = solver::HEURISTIC_MOM;
 
     // Parse input parameter
     int srcid = 0, toStdout = 0;

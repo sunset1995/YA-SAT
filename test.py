@@ -34,8 +34,10 @@ for dirname, dirnames, filenames in os.walk(sys.argv[1]):
             ERROR = ERROR + 1
             continue
         if result.find('UNSATISFIABLE') != -1:
+            print('UNSAT')
             UNSAT = UNSAT + 1
         else:
+            print('SAT')
             SAT = SAT + 1
         statistic = str(proc.stderr.read()).split('\\n')
         nowTime = float(re.findall('[-+]?\d*\.\d+|[-+]?\d+', statistic[1])[0])
