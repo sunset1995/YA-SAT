@@ -154,6 +154,7 @@ public:
     DisjointSet dset;
     int nowSetID = 0;
     vector< vector<int> > v2c[2];
+    vector< vector<int> > v2v;
 
 
     // Recursive level
@@ -216,6 +217,9 @@ public:
     vector<int> clsFirstResolve;
     vector< vector<int> > varFirstResolve;
     pii heuristic_JW();
+
+    // Contraint Propagation
+    bool constraintCheck();
 };
 
 #endif

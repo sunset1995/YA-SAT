@@ -66,13 +66,24 @@ void solver::init(const char *filename) {
 
     v2c[0].resize(maxVarIndex+4);
     v2c[1].resize(maxVarIndex+4);
+    v2v.resize(maxVarIndex+4);
+    vector< unordered_set<int> > G(maxVarIndex+4);
     clsFirstResolve.resize(clauses.size()+4, -1);
     varFirstResolve.resize(maxVarIndex+4);
     cid = 0;
     for(auto &cls : clauses) {
         for(int i=0; i<cls.size(); ++i)
+            for(int j=0; j<cls.size(); ++j) {
+                G[cls.getVar(i)].insert(cls.getVar(j));
+                G[cls.getVar(j)].insert(cls.getVar(i));
+            }
+        for(int i=0; i<cls.size(); ++i) 
             v2c[cls.getSign(i)][cls.getVar(i)].emplace_back(cid);
         ++cid;
+    }
+    for(int i=1; i<=maxVarIndex; ++i) {
+        for(auto v : G[i])
+            v2v[i].emplace_back(v);
     }
 
 }
@@ -244,6 +255,17 @@ bool solver::_solve() {
         if( now.trie == -1 ) {
 
             // Branching
+
+            if( nowLevel >= (statistic.maxDepth*5>>3) && !constraintCheck() ) {
+                // Backtracking
+                staticOrderFrom = now.pickerInfo;
+                ++statistic.backtrackNum;
+                if( nowLevel == 0 )
+                    break;
+                backToLevel(nowLevel-1);
+                continue;
+            }
+
             ++nowLevel;
             statistic.maxDepth = max(nowLevel, statistic.maxDepth);
 
@@ -269,6 +291,34 @@ bool solver::_solve() {
 }
 
 
+// Constraint Propagation
+bool solver::constraintCheck() {
+    ++nowLevel;
+    const int guestnum = 10;
+    int top = -1;
+    vector<int> checklist(guestnum);
+    for(int t=0, i=rand()%maxVarIndex+1;
+            t<maxVarIndex && top!=guestnum-1;
+            ++t, i=(++i>maxVarIndex ? 1 : i )
+            )
+        if( var.getVal(i) == 2 )
+            checklist[++top] = i;
+    bool ret = true;
+    for(int t=0; t<=top; ++t) {
+        int i = checklist[t];
+        ret = set(i, false);
+        backToLevel(nowLevel-1);
+        if( ret ) continue;
+        ret = set(i, true);
+        backToLevel(nowLevel-1);
+        if( !ret ) break;
+    }
+    --nowLevel;
+    return ret;
+}
+
+
+// Heuristic
 void solver::heuristicInit_no() {
     staticOrderFrom = 0;
     staticOrder.resize(maxVarIndex);
