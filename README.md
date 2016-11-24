@@ -3,7 +3,7 @@ Yet Another SAT Solver. Term project of PACA.
 
 
 ## How to
-- To build `make clean && make`  
+- To build `./build.sh`  
 - To run `./yasat [options] benchmark.cnf`  
     - `-statistic` print statistic result to _stderr_  
     - `-stdout` print result to stdout instead of file  
