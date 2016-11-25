@@ -64,17 +64,6 @@ void solver::init(const char *filename) {
             dset.unionSet(cls.getVar(id), cls.getVar(i));
     }
 
-    v2c[0].resize(maxVarIndex+4);
-    v2c[1].resize(maxVarIndex+4);
-    clsFirstResolve.resize(clauses.size()+4, -1);
-    varFirstResolve.resize(maxVarIndex+4);
-    cid = 0;
-    for(auto &cls : clauses) {
-        for(int i=0; i<cls.size(); ++i)
-            v2c[cls.getSign(i)][cls.getVar(i)].emplace_back(cid);
-        ++cid;
-    }
-
 }
 
 
@@ -146,42 +135,12 @@ bool solver::set(int id, bool val) {
         }
 
     }
-    if( this->onVarSet )
-        (this->*onVarSet)(id, val);
     return true;
 
 }
 
 void solver::backToLevel(int lv) {
-    if( this->onVarReset )
-        (this->*onVarReset)(lv);
     var.backToLevel(lv);
-}
-
-void solver::onVarSet_JW(int id, int val) {
-    for(auto cid : v2c[val][id])
-        if( clsFirstResolve[cid] == -1 ) {
-            auto &cls = clauses[cid];
-            if( cls.size() > 13 ) continue;
-            long long clauseScore = (1LL<<(13-cls.size()));
-            for(int i=0; i<cls.size(); ++i)
-                jwScore[cls.getVar(i)] -= clauseScore;
-            clsFirstResolve[cid] = id;
-            varFirstResolve[id].emplace_back(cid);
-        }
-}
-void solver::onVarReset_JW(int lv) {
-    for(int i=var.top; i>var.level[lv]; --i) {
-        for(auto cid : varFirstResolve[var.stk[i].var]) {
-            clsFirstResolve[cid] = -1;
-            auto &cls = clauses[cid];
-            if( cls.size() > 13 ) continue;
-            long long clauseScore = (1LL<<(13-cls.size()));
-            for(int i=0; i<cls.size(); ++i)
-                jwScore[cls.getVar(i)] += clauseScore;
-        }
-        varFirstResolve[var.stk[i].var].clear();
-    }
 }
 
 
@@ -203,12 +162,6 @@ bool solver::solve(int mode) {
         else if( mode == HEURISTIC_MOM ) {
             heuristicInit_MOM();
             pickUnassignedVar = &solver::heuristic_static;
-        }
-        else if( mode == HEURISTIC_JW ) {
-            heuristicInit_JW();
-            pickUnassignedVar = &solver::heuristic_JW;
-            onVarSet = &solver::onVarSet_JW;
-            onVarReset = &solver::onVarReset_JW;
         }
         else {
             fprintf(stderr, "Unknown solver mode\n");
@@ -308,19 +261,6 @@ void solver::heuristicInit_MOM() {
             v.second = 0;
 }
 
-void solver::heuristicInit_JW() {
-    jwScore.resize(maxVarIndex+4, 0);
-    for(auto &cls : clauses) {
-        if( cls.size() > 13 ) continue;
-        long long clauseScore = (1LL<<(13-cls.size()));
-        for(int i=0; i<cls.size(); ++i)
-            jwScore[cls.getVar(i)] += clauseScore;
-    }
-    for(int i=1; i<=maxVarIndex; ++i)
-        if( !dset.sameSet(i, nowSetID) )
-            jwScore[i] = -1;
-}
-
 pair<int,int> solver::heuristic_static() {
     for(int i=staticOrderFrom; i<staticOrder.size(); ++i)
         if( var.getVal(staticOrder[i].first)==2 && 
@@ -329,14 +269,4 @@ pair<int,int> solver::heuristic_static() {
             return staticOrder[i];
         }
     return {-1, 0};
-}
-
-pair<int,int> solver::heuristic_JW() {
-    int pick = -1, pickVal = 0;
-    for(int i=1; i<=maxVarIndex; ++i)
-        if( var.getVal(i)==2 && (pick==-1 || jwScore[i]>pickVal) ) {
-            pick = i;
-            pickVal = jwScore[i];
-        }
-    return {pick, 0};
 }

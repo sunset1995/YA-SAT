@@ -14,8 +14,7 @@ void helpMessage() {
     puts("  -statistic: print statitic result to stderr");
     puts("  -stdout   : print result to stdout instead of file");
     puts("  -no       : don't use any heuristic");
-    puts("  -mom      : use MOM branching heuristic");
-    puts("  -jw       : (default) use Jeroslaw-Wang branching heuristic");
+    puts("  -mom      : (default) use MOM branching heuristic");
 }
 
 
@@ -48,9 +47,6 @@ int main(int argc, const char *argv[]) {
         }
         else if( strcmp(argv[i], "-mom") == 0 ) {
             mode = solver::HEURISTIC_MOM;
-        }
-        else if( strcmp(argv[i], "-jw") == 0 ) {
-            mode = solver::HEURISTIC_JW;
         }
         else {
             helpMessage();

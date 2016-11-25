@@ -136,7 +136,6 @@ public:
         INFINITE = 1023456789,
         HEURISTIC_NO = 1011,
         HEURISTIC_MOM = 1012,
-        HEURISTIC_JW = 1013,
     };
     struct WatcherInfo {
         int clsid, wid;
@@ -153,7 +152,6 @@ public:
     opStack var;
     DisjointSet dset;
     int nowSetID = 0;
-    vector< vector<int> > v2c[2];
 
 
     // Recursive level
@@ -175,10 +173,6 @@ public:
 
     bool set(int var, bool val);
     void backToLevel(int lv);
-    void onVarSet_JW(int id, int val);
-    void onVarReset_JW(int lv);
-    void (solver::*onVarSet)(int,int) = NULL;
-    void (solver::*onVarReset)(int) = NULL;
 
     bool solve(int mode);
     bool _solve();
@@ -210,12 +204,7 @@ public:
 
     void heuristicInit_no();
     void heuristicInit_MOM();
-    void heuristicInit_JW();
     pii heuristic_static();
-    vector<long long> jwScore;
-    vector<int> clsFirstResolve;
-    vector< vector<int> > varFirstResolve;
-    pii heuristic_JW();
 };
 
 #endif
