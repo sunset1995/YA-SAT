@@ -149,12 +149,14 @@ bool solver::solve(int mode) {
     if( unsatAfterInit ) return false;
 
     sat = true;
+    nowLevel = 0;
     for(int i=1; i<=maxVarIndex && sat; ++i) {
 
         if( dset.findRoot(i) != i ) continue;
         
         nowSetID = i;
 
+        // Init for specific heuristic
         if( mode == HEURISTIC_NO ) {
             heuristicInit_no();
             pickUnassignedVar = &solver::heuristic_static;
@@ -168,7 +170,6 @@ bool solver::solve(int mode) {
             exit(1);
         }
 
-        nowLevel = 0;
         sat &= _solve();
 
     }
@@ -176,6 +177,8 @@ bool solver::solve(int mode) {
     return sat;
 }
 bool solver::_solve() {
+
+    int bound = nowLevel;
 
     while( true ) {
 
@@ -187,7 +190,7 @@ bool solver::_solve() {
             now.trie = -1;
             staticOrderFrom = now.pickerInfo;
             ++statistic.backtrackNum;
-            if( --nowLevel == 0 )
+            if( --nowLevel == bound )
                 break;
             backToLevel(nowLevel-1);
             continue;
@@ -202,11 +205,10 @@ bool solver::_solve() {
 
             now.pickerInfo = staticOrderFrom;
             pii decision = (this->*pickUnassignedVar)();
+            if( decision.first == -1 ) return true;
             now.var = decision.first;
             now.val = decision.second;
             now.trie = 0;
-
-            if( now.var == -1 ) return true;
 
         }
 
