@@ -201,7 +201,6 @@ bool solver::_solve() {
             statistic.maxDepth = max(nowLevel, statistic.maxDepth);
 
             now.pickerInfo = staticOrderFrom;
-            staticOrderFrom = 0;
             pii decision = (this->*pickUnassignedVar)();
             now.var = decision.first;
             now.val = decision.second;
