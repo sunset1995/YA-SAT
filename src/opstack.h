@@ -6,38 +6,50 @@ using namespace std;
 
 
 class opStack {
+
 public:
+
     struct op {
         int var, val;
         int trie = -1, pickerInfo = 0;
     };
-    vector<int> idx;
-    vector<int> level;
     vector<op> stk;
-    int top = -1;
+
     opStack() {}
-    opStack(int n):idx(n), level(n), stk(n) {
+    opStack(int n)
+    :stk(n), idx(n), level(n) {
         level[0] = -1;
     }
-    inline bool notSet(int id) const {
-        return idx[id] > top || stk[idx[id]].var != id;
-    }
+    
     inline int getVal(int id) const {
-        if( notSet(id) ) return 2;
+        if( idx[id] > _top || stk[idx[id]].var != id )
+            return 2;
         return stk[idx[id]].val;
     }
+    inline op& topNext() {
+        // Return variable on decision or empty slot
+        return stk[_top+1];
+    }
     inline void set(int id, int val, int lv) {
-        //fprintf(stderr, "set %d = %d@%d\n", id, val, lv);
-        ++top;
-        stk[top].var = id;
-        stk[top].val = val;
-        level[lv] = top;
-        idx[id] = top;
+        // Set id = val@lv
+        ++_top;
+        stk[_top].var = id;
+        stk[_top].val = val;
+        idx[id] = _top;
+        level[lv] = _top;
     }
     inline void backToLevel(int lv) {
-        //fprintf(stderr, "backToLevel %d\n", lv);
-        top = level[lv];
+        // Move top pointer to that level's last assignment
+        _top = level[lv];
     }
+
+
+protected:
+
+    vector<int> idx;
+    vector<int> level;
+    int _top = -1;
+
 };
 
 #endif

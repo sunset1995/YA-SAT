@@ -139,10 +139,6 @@ bool solver::set(int id, bool val) {
 
 }
 
-void solver::backToLevel(int lv) {
-    var.backToLevel(lv);
-}
-
 
 bool solver::solve(int mode) {
     statistic.init();
@@ -182,20 +178,19 @@ bool solver::_solve() {
 
     while( true ) {
 
-        opStack::op &now = var.stk[var.top+1];
-
-        if( now.trie == 2 ) {
+        while( var.topNext().trie == 2 ) {
 
             // Backtracking
-            now.trie = -1;
-            staticOrderFrom = now.pickerInfo;
+            var.topNext().trie = -1;
+            staticOrderFrom = var.topNext().pickerInfo;
             ++statistic.backtrackNum;
             if( --nowLevel == bound )
-                break;
-            backToLevel(nowLevel-1);
-            continue;
+                return false;
+            var.backToLevel(nowLevel-1);
 
         }
+
+        opStack::op &now = var.topNext();
 
         if( now.trie == -1 ) {
 
@@ -213,9 +208,7 @@ bool solver::_solve() {
         }
 
         if( !set(now.var, now.val ^ (now.trie++)) )
-            backToLevel(nowLevel-1);
-        else
-            continue;
+            var.backToLevel(nowLevel-1);
 
     }
 
