@@ -1,7 +1,8 @@
 #include "solver.h"
 
 
-bool satisfyAlready(const vector<int> &cls) {
+// Solver helper function
+static bool satisfyAlready(const vector<int> &cls) {
     unordered_set<int> checker;
     for(auto &v : cls) {
         if( checker.find(-v) != checker.end() )
@@ -12,19 +13,23 @@ bool satisfyAlready(const vector<int> &cls) {
 }
 
 
+// Init solver with cnf file
 void solver::init(const char *filename) {
 
+    // Init with empty solver
     *this = solver();
 
-    vector< vector<int> > tmp;
-    parse_DIMACS_CNF(tmp, maxVarIndex, filename);
+    // Get raw clause from cnf file
+    vector< vector<int> > raw;
+    parse_DIMACS_CNF(raw, maxVarIndex, filename);
 
-    var = opStack(maxVarIndex + 4);
-    pos = vector< vector<WatcherInfo> >(maxVarIndex+4);
-    neg = vector< vector<WatcherInfo> >(maxVarIndex+4);
+    // Init assignment stack
+    var = opStack(maxVarIndex+4);
 
+    // Init database with all clause which has 2 or more literal in raw database
+    // Eliminate all unit clause and check whether there is empty clause
     vector<int> unit;
-    for(auto &cls : tmp) {
+    for(auto &cls : raw) {
         if( cls.empty() ) unsatAfterInit = 1;
         else if( cls.size() == 1 ) unit.emplace_back(cls[0]);
         else if( !satisfyAlready(cls) ) {
@@ -35,6 +40,9 @@ void solver::init(const char *filename) {
         }
     }
 
+    // Init two watching check list
+    pos = vector< vector<WatcherInfo> >(maxVarIndex+4);
+    neg = vector< vector<WatcherInfo> >(maxVarIndex+4);
     int cid = 0;
     for(auto &cls : clauses) {
         int id = cls.getWatchVar(0); 
@@ -51,17 +59,19 @@ void solver::init(const char *filename) {
         ++cid;
     }
 
+    // Assign and run BCP for all unit clause
     for(auto lit : unit)
         unsatAfterInit |= !set(abs(lit), lit>0);
 
+    // Identify independent subproblem via disjoint set
     dset.init(maxVarIndex+4);
     for(auto &cls : clauses) {
         int id = 0;
         while( id<cls.size() && var.getVal(cls.getVar(id))!=2 )
             ++id;
-        if( id == cls.size() ) continue;
         for(int i=id+1; i<cls.size(); ++i)
-            dset.unionSet(cls.getVar(id), cls.getVar(i));
+            if( var.getVal(cls.getVar(i))==2 )
+                dset.unionSet(cls.getVar(i), cls.getVar(id));
     }
 
 }
