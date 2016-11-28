@@ -77,64 +77,41 @@ void solver::init(const char *filename) {
 }
 
 
-bool solver::evalClauesLit(int clsid, int id) const {
-    return evalClauesLit(clauses[clsid], id);
-}
-bool solver::evalClauesLit(const Clause &cls, int id) const {
-    return var.getVal(cls.getVar(id)) == cls.getSign(id);
-}
-
-
-bool solver::evalClauesWatchedLit(const WatcherInfo &info) const {
-    return evalClauesWatchedLit(info.clsid, info.wid);
-}
-bool solver::evalClauesWatchedLit(int clsid, int wid) const {
-    return evalClauesWatchedLit(clauses[clsid], wid);
-}
-bool solver::evalClauesWatchedLit(const Clause &cls, int wid) const {
-    return evalClauesLit(cls, cls.watcher[wid]);
-}
-
-
-int solver::updateClauseWatcher(const WatcherInfo &info) {
-    return updateClauseWatcher(info.clsid, info.wid);
-}
-int solver::updateClauseWatcher(int clsid, int wid) {
-    return updateClauseWatcher(clauses[clsid], wid);
-}
-int solver::updateClauseWatcher(Clause &cls, int wid) {
-
-    for(int counter=cls.size(); counter; --counter) {
-        
-        cls.watchNext(wid);
-        if( !cls.watchSame() && 
-                (var.getVal(cls.getWatchVar(wid)) == 2 || evalClauesWatchedLit(cls, wid)) )
-            return cls.getWatchLit(wid);
-
-    }
-    return cls.getWatchLit(wid);
-
-}
-
-
+// Assign id=val@nowLevel and run BCP recursively
 bool solver::set(int id, bool val) {   
 
+    // If id is already set, check consistency
     if( var.getVal(id) != 2 )
         return var.getVal(id) == val;
+
+    // Set id=val@nowLevel
     var.set(id, val, nowLevel);
+
+    // Update 2 literal watching
     vector<WatcherInfo> &lst = (val ? neg[id] : pos[id]);
     for(int i=lst.size()-1; i>=0; --i) {
 
+        // Update watcher
         updateClauseWatcher(lst[i]);
         if( getVal(lst[i]) == 2 || eval(lst[i]) ) {
+            // Watcher reaches an pending/satisfied variable
+
+            // Push this watcher to corresponding check list
             if( getSign(lst[i]) )
                 pos[getVar(lst[i])].emplace_back(lst[i]);
             else
                 neg[getVar(lst[i])].emplace_back(lst[i]);
+
+            // Delete this watcher from current check list
             swap(lst[i], lst.back());
             lst.pop_back();
+
         }
         else {
+            // Watcher run through all clause back to original one
+            // Can't find next literal to watch
+
+            // b = alternative watcher in this clause
             WatcherInfo b(lst[i].clsid, lst[i].wid^1);
             if( getVal(b) == 2 ) {
                 if( !set(getVar(b), getSign(b)) )
@@ -142,20 +119,28 @@ bool solver::set(int id, bool val) {
             }
             else if( !eval(b) )
                 return false;
+
         }
 
     }
+
+    // BCP done successfully without conflict
     return true;
 
 }
 
 
 bool solver::solve(int mode) {
+
+    // Init statistic and start timer
     statistic.init();
     if( unsatAfterInit ) return false;
 
+    // Init DPLL
     sat = true;
     nowLevel = 0;
+
+    // Solve each independent subproblems
     for(int i=1; i<=maxVarIndex && sat; ++i) {
 
         if( dset.findRoot(i) != i ) continue;
@@ -163,6 +148,7 @@ bool solver::solve(int mode) {
         nowSetID = i;
 
         // Init for specific heuristic
+        // This must be done before each subproblems
         if( mode == HEURISTIC_NO ) {
             heuristicInit_no();
             pickUnassignedVar = &solver::heuristic_static;
@@ -180,12 +166,17 @@ bool solver::solve(int mode) {
 
     }
     statistic.stopTimer();
+
     return sat;
+
 }
+
 bool solver::_solve() {
 
+    // This subproblem startting stack index
     int bound = nowLevel;
 
+    // Main loop for DPLL
     while( true ) {
 
         while( var.topNext().trie == 2 ) {
@@ -226,6 +217,9 @@ bool solver::_solve() {
 }
 
 
+/****************************************
+    Implementing Branching Heuristic
+****************************************/
 void solver::heuristicInit_no() {
     staticOrderFrom = 0;
     staticOrder.resize(maxVarIndex);

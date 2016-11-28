@@ -16,7 +16,9 @@ using namespace std;
 
 
 class solver {
+
 public:
+
     typedef pair<int,int> pii;
     enum {
         INFINITE = 1023456789,
@@ -38,50 +40,45 @@ public:
     opStack var;
     DisjointSet dset;
     int nowSetID = 0;
-
-
-    // Recursive level
     int nowLevel = 0;
 
 
+    // Main function
     void init(const char *filename);
-
-    bool evalClauesLit(int clsid, int id) const;
-    bool evalClauesLit(const Clause &cls, int id) const;
-
-    bool evalClauesWatchedLit(const WatcherInfo &info) const;
-    bool evalClauesWatchedLit(int clsid, int wid) const;
-    bool evalClauesWatchedLit(const Clause &cls, int wid) const;
-
-    int updateClauseWatcher(const WatcherInfo &info);
-    int updateClauseWatcher(int clsid, int wid);
-    int updateClauseWatcher(Clause &cls, int wid);
 
     bool set(int var, bool val);
     void backToLevel(int lv);
 
     bool solve(int mode);
+
+
+protected:
+
     bool _solve();
+
+
+    // Clause helper function
+    inline bool evalClauesLit(int clsid, int id) const;
+    inline bool evalClauesLit(const Clause &cls, int id) const;
+    inline bool evalClauesWatchedLit(const WatcherInfo &info) const;
+    inline bool evalClauesWatchedLit(int clsid, int wid) const;
+    inline bool evalClauesWatchedLit(const Clause &cls, int wid) const;
+    inline int updateClauseWatcher(const WatcherInfo &info);
+    inline int updateClauseWatcher(int clsid, int wid);
+    inline int updateClauseWatcher(Clause &cls, int wid);
 
 
     // 2 Literal Watching
     vector< vector<WatcherInfo> > pos;
     vector< vector<WatcherInfo> > neg;
-    inline int getLit(const WatcherInfo &info) const {
-        return clauses[info.clsid].getWatchLit(info.wid);
-    }
-    inline int getVar(const WatcherInfo &info) const {
-        return clauses[info.clsid].getWatchVar(info.wid);
-    }
-    inline int getSign(const WatcherInfo &info) const {
-        return clauses[info.clsid].getWatchSign(info.wid);
-    }
-    inline int getVal(const WatcherInfo &info) const {
-        return var.getVal(getVar(info));
-    }
-    inline bool eval(const WatcherInfo &info) const {
-        return evalClauesWatchedLit(clauses[info.clsid], info.wid);
-    }
+
+    // 2 Literal Watching helper function
+    inline int getLit(const WatcherInfo &info) const;
+    inline int getVar(const WatcherInfo &info) const;
+    inline int getSign(const WatcherInfo &info) const;
+    inline int getVal(const WatcherInfo &info) const;
+    inline bool eval(const WatcherInfo &info) const;
+
 
     // Branching Heuristic
     int staticOrderFrom;
@@ -91,6 +88,65 @@ public:
     void heuristicInit_no();
     void heuristicInit_MOM();
     pii heuristic_static();
+
 };
+
+
+// Clause helper function
+inline bool solver::evalClauesLit(int clsid, int id) const {
+    return evalClauesLit(clauses[clsid], id);
+}
+inline bool solver::evalClauesLit(const Clause &cls, int id) const {
+    return var.getVal(cls.getVar(id)) == cls.getSign(id);
+}
+
+inline bool solver::evalClauesWatchedLit(const WatcherInfo &info) const {
+    return evalClauesWatchedLit(info.clsid, info.wid);
+}
+inline bool solver::evalClauesWatchedLit(int clsid, int wid) const {
+    return evalClauesWatchedLit(clauses[clsid], wid);
+}
+inline bool solver::evalClauesWatchedLit(const Clause &cls, int wid) const {
+    return evalClauesLit(cls, cls.watcher[wid]);
+}
+
+inline int solver::updateClauseWatcher(const WatcherInfo &info) {
+    return updateClauseWatcher(info.clsid, info.wid);
+}
+inline int solver::updateClauseWatcher(int clsid, int wid) {
+    return updateClauseWatcher(clauses[clsid], wid);
+}
+inline int solver::updateClauseWatcher(Clause &cls, int wid) {
+
+    for(int counter=cls.size(); counter; --counter) {
+        
+        cls.watchNext(wid);
+        if( !cls.watchSame() && 
+                (var.getVal(cls.getWatchVar(wid)) == 2 || evalClauesWatchedLit(cls, wid)) )
+            return cls.getWatchLit(wid);
+
+    }
+    return cls.getWatchLit(wid);
+
+}
+
+
+// 2 Literal Watching helper function
+inline int solver::getLit(const WatcherInfo &info) const {
+    return clauses[info.clsid].getWatchLit(info.wid);
+}
+inline int solver::getVar(const WatcherInfo &info) const {
+    return clauses[info.clsid].getWatchVar(info.wid);
+}
+inline int solver::getSign(const WatcherInfo &info) const {
+    return clauses[info.clsid].getWatchSign(info.wid);
+}
+inline int solver::getVal(const WatcherInfo &info) const {
+    return var.getVal(getVar(info));
+}
+inline bool solver::eval(const WatcherInfo &info) const {
+    return evalClauesWatchedLit(clauses[info.clsid], info.wid);
+}
+
 
 #endif
