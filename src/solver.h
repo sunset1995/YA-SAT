@@ -6,6 +6,7 @@
 #include "disjointset.h"
 #include "opstack.h"
 #include "statistic.h"
+#include "lazytable.h"
 #include <sys/time.h>
 #include <cmath>
 #include <cstdlib>
@@ -46,7 +47,7 @@ public:
     // Main function
     void init(const char *filename);
 
-    bool set(int var, bool val);
+    bool set(int var, bool val, int src=-1);
     void backToLevel(int lv);
 
     bool solve(int mode);
@@ -55,6 +56,9 @@ public:
 protected:
 
     bool _solve();
+    int conflictingClsID = -1;
+    Lazytable litMarker;
+    inline bool _resolve(int clsid, int x, vector<int> &curr, vector<int> &prev);
 
 
     // Clause helper function
@@ -92,6 +96,27 @@ protected:
 };
 
 
+// Resolve helper
+inline bool solver::_resolve(int clsid, int x, vector<int> &curr, vector<int> &prev) {
+
+    for(int i=0; i<clauses[clsid].size(); ++i) {
+        int lit = clauses[clsid].getLit(i);
+        int vid = clauses[clsid].getVar(i);
+        int sign = clauses[clsid].getSign(i);
+        if( vid == x || litMarker.get(vid) == sign ) continue;
+        if( litMarker.get(vid) != -1 ) return false;
+        litMarker.set(vid, sign);
+        if( var.getLv(vid) == nowLevel )
+            curr.emplace_back(lit);
+        else
+            prev.emplace_back(lit);
+    }
+
+    return true;
+
+}
+
+
 // Clause helper function
 inline bool solver::evalClauesLit(int clsid, int id) const {
     return evalClauesLit(clauses[clsid], id);
@@ -119,9 +144,9 @@ inline int solver::updateClauseWatcher(int clsid, int wid) {
 inline int solver::updateClauseWatcher(Clause &cls, int wid) {
 
     for(int counter=cls.size(); counter; --counter) {
-        
+
         cls.watchNext(wid);
-        if( !cls.watchSame() && 
+        if( !cls.watchSame() &&
                 (var.getVal(cls.getWatchVar(wid)) == 2 || evalClauesWatchedLit(cls, wid)) )
             return cls.getWatchLit(wid);
 

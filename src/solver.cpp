@@ -45,13 +45,13 @@ void solver::init(const char *filename) {
     neg = vector< vector<WatcherInfo> >(maxVarIndex+4);
     int cid = 0;
     for(auto &cls : clauses) {
-        int id = cls.getWatchVar(0); 
+        int id = cls.getWatchVar(0);
         if( cls.getWatchSign(0) )
             pos[id].emplace_back(WatcherInfo(cid, 0));
         else
             neg[id].emplace_back(WatcherInfo(cid, 0));
 
-        id = cls.getWatchVar(1); 
+        id = cls.getWatchVar(1);
         if( cls.getWatchSign(1) )
             pos[id].emplace_back(WatcherInfo(cid, 1));
         else
@@ -78,14 +78,16 @@ void solver::init(const char *filename) {
 
 
 // Assign id=val@nowLevel and run BCP recursively
-bool solver::set(int id, bool val) {   
+bool solver::set(int id, bool val, int src) {
 
     // If id is already set, check consistency
-    if( var.getVal(id) != 2 )
+    if( var.getVal(id) != 2 ) {
+        conflictingClsID = -1;
         return var.getVal(id) == val;
+    }
 
     // Set id=val@nowLevel
-    var.set(id, val, nowLevel);
+    var.set(id, val, nowLevel, src);
 
     // Update 2 literal watching
     vector<WatcherInfo> &lst = (val ? neg[id] : pos[id]);
@@ -114,11 +116,13 @@ bool solver::set(int id, bool val) {
             // b = alternative watcher in this clause
             WatcherInfo b(lst[i].clsid, lst[i].wid^1);
             if( getVal(b) == 2 ) {
-                if( !set(getVar(b), getSign(b)) )
+                if( !set(getVar(b), getSign(b), lst[i].clsid) )
                     return false;
             }
-            else if( !eval(b) )
+            else if( !eval(b) ) {
+                conflictingClsID = lst[i].clsid;
                 return false;
+            }
 
         }
 
@@ -137,6 +141,7 @@ bool solver::solve(int mode) {
     if( unsatAfterInit ) return false;
 
     // Init DPLL
+    litMarker.init(maxVarIndex+4);
     sat = true;
     nowLevel = 0;
 
@@ -144,7 +149,7 @@ bool solver::solve(int mode) {
     for(int i=1; i<=maxVarIndex && sat; ++i) {
 
         if( dset.findRoot(i) != i ) continue;
-        
+
         nowSetID = i;
 
         // Init for specific heuristic
@@ -174,42 +179,96 @@ bool solver::solve(int mode) {
 bool solver::_solve() {
 
     // This subproblem startting stack index
-    int bound = nowLevel;
+    const int bound = nowLevel;
 
     // Main loop for DPLL
     while( true ) {
 
-        while( var.topNext().trie == 2 ) {
+        ++nowLevel;
+        statistic.maxDepth = max(statistic.maxDepth, nowLevel);
+        staticOrderFrom = 0;
+        pii decision = (this->*pickUnassignedVar)();
+        if( decision.first == -1 )
+            return true;
+        int vid = decision.first;
+        int sign = decision.second;
 
-            // Backtracking
-            var.topNext().trie = -1;
-            staticOrderFrom = var.topNext().pickerInfo;
-            ++statistic.backtrackNum;
-            if( --nowLevel == bound )
+        while( !set(vid, sign) ) {
+
+            if( conflictingClsID == -1 )
                 return false;
-            var.backToLevel(nowLevel-1);
+
+            // Init
+            litMarker.clear();
+            vector<int> curr;
+            vector<int> prev;
+            if( !_resolve(conflictingClsID, -1, curr, prev) )
+                return false;
+
+            // Resolve and find 1UIP
+            int uip = curr.back();
+            int notFoundUIP = 1;
+            for(int i=0; i<curr.size()-notFoundUIP; ++i) {
+                int vid = abs(curr[i]);
+                int clsid = var.getSrc(vid);
+                if( clsid != -1 ) {
+                    if( !_resolve(clsid, vid, curr, prev) )
+                        return false;
+                }
+                else {
+                    uip = curr[i];
+                    notFoundUIP = 0;
+                }
+            }
+            if( notFoundUIP )
+                uip = curr.back();
+
+            // Determined cronological backtracking
+            int backlv = bound;
+            int towatch = -1;
+            for(int i=0; i<prev.size(); ++i)
+                if( var.getLv(abs(prev[i])) > backlv ) {
+                    backlv = var.getLv(abs(prev[i]));
+                    towatch = i;
+                }
+
+            // Learn one assignment
+            if( prev.empty() || backlv == bound ) {
+                ++statistic.backtrackNum;
+                var.backToLevel(bound);
+                nowLevel = bound;
+                if( !set(abs(uip), uip>0) )
+                    return false;
+                break;
+            }
+
+            // Add conflict clause
+            prev.emplace_back(uip);
+            clauses.push_back(Clause());
+            clauses.back().watcher[0] = towatch;
+            clauses.back().watcher[1] = prev.size() - 1;
+            clauses.back().lit = move(prev);
+
+            int cid = clauses.size() - 1;
+            int id = clauses.back().getWatchVar(0);
+            if( clauses.back().getWatchSign(0) )
+                pos[id].emplace_back(WatcherInfo(cid, 0));
+            else
+                neg[id].emplace_back(WatcherInfo(cid, 0));
+
+            id = clauses.back().getWatchVar(1);
+            if( clauses.back().getWatchSign(1) )
+                pos[id].emplace_back(WatcherInfo(cid, 1));
+            else
+                neg[id].emplace_back(WatcherInfo(cid, 1));
+
+            ++statistic.backtrackNum;
+            var.backToLevel(backlv-1);
+            nowLevel = backlv;
+            vid = var.topNext().var;
+            sign = var.topNext().val;
 
         }
-
-        opStack::op &now = var.topNext();
-
-        if( now.trie == -1 ) {
-
-            // Branching
-            ++nowLevel;
-            statistic.maxDepth = max(nowLevel, statistic.maxDepth);
-
-            now.pickerInfo = staticOrderFrom;
-            pii decision = (this->*pickUnassignedVar)();
-            if( decision.first == -1 ) return true;
-            now.var = decision.first;
-            now.val = decision.second;
-            now.trie = 0;
-
-        }
-
-        if( !set(now.var, now.val ^ (now.trie++)) )
-            var.backToLevel(nowLevel-1);
 
     }
 
@@ -261,7 +320,7 @@ void solver::heuristicInit_MOM() {
 
 pair<int,int> solver::heuristic_static() {
     for(int i=staticOrderFrom; i<staticOrder.size(); ++i)
-        if( var.getVal(staticOrder[i].first)==2 && 
+        if( var.getVal(staticOrder[i].first)==2 &&
                 dset.sameSet(staticOrder[i].first, nowSetID) ) {
             staticOrderFrom = i+1;
             return staticOrder[i];
