@@ -8,11 +8,14 @@ struct Statistic {
 
     int backtrackNum = 0;
     int maxDepth = 0;
+    int learnAssignment = 0;
+    int learnCls = 0;
+    int maxJumpBack = 0;
     struct timeval start, end;
 
     // Init and start counter
     inline void init() {
-        backtrackNum = maxDepth = 0;
+        backtrackNum = maxDepth = learnAssignment = learnCls = 0;
         gettimeofday(&start, 0);
         gettimeofday(&end, 0);
     }

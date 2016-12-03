@@ -235,8 +235,10 @@ bool solver::_solve() {
             // Learn one assignment
             if( prev.empty() || backlv == bound ) {
                 ++statistic.backtrackNum;
+                ++statistic.learnAssignment;
                 var.backToLevel(bound);
                 nowLevel = bound;
+                statistic.maxJumpBack = max(statistic.maxJumpBack, nowLevel-bound);
                 if( !set(abs(uip), uip>0) )
                     return false;
                 break;
@@ -263,6 +265,8 @@ bool solver::_solve() {
                 neg[id].emplace_back(WatcherInfo(cid, 1));
 
             ++statistic.backtrackNum;
+            ++statistic.learnCls;
+            statistic.maxJumpBack = max(statistic.maxJumpBack, nowLevel-backlv);
             var.backToLevel(backlv-1);
             nowLevel = backlv;
             vid = var.topNext().var;
