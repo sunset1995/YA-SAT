@@ -200,40 +200,38 @@ bool solver::_solve() {
 
             // Init
             litMarker.clear();
-            vector<int> curr;
-            vector<int> prev;
-            if( !_resolve(conflictingClsID, -1, curr, prev) )
+            vector<int> learnt;
+            int todoNum = _resolve(conflictingClsID, -1, learnt);
+            if( todoNum == -1 )
                 return false;
 
             // Resolve and find 1UIP
-            int uip = curr.back();
-            int notFoundUIP = 1;
-            for(int i=0; i<curr.size()-notFoundUIP; ++i) {
-                int vid = abs(curr[i]);
-                int clsid = var.getSrc(vid);
-                if( clsid != -1 ) {
-                    if( !_resolve(clsid, vid, curr, prev) )
-                        return false;
-                }
-                else {
-                    uip = curr[i];
-                    notFoundUIP = 0;
-                }
+            //fprintf(stderr, "nowLevel %d\n", nowLevel);
+            int top = var._top;
+            while( todoNum > 1 ) {
+                while( litMarker.get(var.stk[top].var) == -1 )
+                    --top;
+                int nowNum = _resolve(var.stk[top].src, var.stk[top].var, learnt);
+                if( nowNum == -1 )
+                    return false;
+                todoNum += nowNum - 1;
+                --top;
+                while( litMarker.get(var.stk[top].var) == -1 )
+                    --top;
             }
-            if( notFoundUIP )
-                uip = curr.back();
+            int uip = (var.stk[top].val > 0 ? -var.stk[top].var : var.stk[top].var);
 
             // Determined cronological backtracking
             int backlv = bound;
             int towatch = -1;
-            for(int i=0; i<prev.size(); ++i)
-                if( var.getLv(abs(prev[i])) > backlv ) {
-                    backlv = var.getLv(abs(prev[i]));
+            for(int i=0; i<learnt.size(); ++i)
+                if( var.getLv(abs(learnt[i])) > backlv ) {
+                    backlv = var.getLv(abs(learnt[i]));
                     towatch = i;
                 }
 
             // Learn one assignment
-            if( prev.empty() || backlv == bound ) {
+            if( learnt.empty() || backlv == bound ) {
                 ++statistic.backtrackNum;
                 ++statistic.learnAssignment;
                 var.backToLevel(bound);
@@ -245,11 +243,11 @@ bool solver::_solve() {
             }
 
             // Add conflict clause
-            prev.emplace_back(uip);
+            learnt.emplace_back(uip);
             clauses.push_back(Clause());
             clauses.back().watcher[0] = towatch;
-            clauses.back().watcher[1] = prev.size() - 1;
-            clauses.back().lit = move(prev);
+            clauses.back().watcher[1] = learnt.size() - 1;
+            clauses.back().lit = move(learnt);
 
             int cid = clauses.size() - 1;
             int id = clauses.back().getWatchVar(0);

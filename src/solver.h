@@ -58,7 +58,7 @@ protected:
     bool _solve();
     int conflictingClsID = -1;
     Lazytable litMarker;
-    inline bool _resolve(int clsid, int x, vector<int> &curr, vector<int> &prev);
+    inline int _resolve(int clsid, int x, vector<int> &prev);
 
 
     // Clause helper function
@@ -97,22 +97,23 @@ protected:
 
 
 // Resolve helper
-inline bool solver::_resolve(int clsid, int x, vector<int> &curr, vector<int> &prev) {
+inline int solver::_resolve(int clsid, int x, vector<int> &prev) {
 
+    int ret = 0;
     for(int i=0; i<clauses[clsid].size(); ++i) {
         int lit = clauses[clsid].getLit(i);
         int vid = clauses[clsid].getVar(i);
         int sign = clauses[clsid].getSign(i);
         if( vid == x || litMarker.get(vid) == sign ) continue;
-        if( litMarker.get(vid) != -1 ) return false;
+        if( litMarker.get(vid) != -1 ) return -1;
         litMarker.set(vid, sign);
         if( var.getLv(vid) == nowLevel )
-            curr.emplace_back(lit);
+            ++ret;
         else
             prev.emplace_back(lit);
     }
 
-    return true;
+    return ret;
 
 }
 
