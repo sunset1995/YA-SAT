@@ -198,51 +198,33 @@ bool solver::_solve() {
             if( conflictingClsID == -1 )
                 return false;
 
-            // Init
-            litMarker.clear();
-            vector<int> learnt;
-            int todoNum = _resolve(conflictingClsID, -1, learnt);
-            if( todoNum == -1 )
+            vector<int> learnt = firstUIP();
+            if( learnt.empty() )
                 return false;
-
-            // Resolve and find 1UIP
-            int top = var._top;
-            while( todoNum > 1 ) {
-                while( litMarker.get(var.stk[top].var) == -1 )
-                    --top;
-                int nowNum = _resolve(var.stk[top].src, var.stk[top].var, learnt);
-                if( nowNum == -1 )
-                    return false;
-                todoNum += nowNum - 1;
-                --top;
-            }
-            while( litMarker.get(var.stk[top].var) == -1 )
-                --top;
-            int uip = (var.stk[top].val > 0 ? -var.stk[top].var : var.stk[top].var);
 
             // Determined cronological backtracking
             int backlv = bound;
             int towatch = -1;
-            for(int i=0; i<learnt.size(); ++i)
+            for(int i=learnt.size()-2; i>=0; --i)
                 if( var.getLv(abs(learnt[i])) > backlv ) {
                     backlv = var.getLv(abs(learnt[i]));
                     towatch = i;
                 }
 
             // Learn one assignment
-            if( learnt.empty() || backlv == bound ) {
+            if( learnt.size() == 1 || backlv == bound ) {
                 ++statistic.backtrackNum;
                 ++statistic.learnAssignment;
                 var.backToLevel(bound);
-                nowLevel = bound;
                 statistic.maxJumpBack = max(statistic.maxJumpBack, nowLevel-bound);
+                nowLevel = bound;
+                int uip = learnt.back();
                 if( !set(abs(uip), uip>0) )
                     return false;
                 break;
             }
 
             // Add conflict clause
-            learnt.emplace_back(uip);
             statistic.maxLearntSz = max(statistic.maxLearntSz, int(learnt.size()));
             clauses.push_back(Clause());
             clauses.back().watcher[0] = towatch;
@@ -278,9 +260,42 @@ bool solver::_solve() {
 }
 
 
-/****************************************
+/******************************************************
+    Implementing Conflict Clause Learning Heuristic
+******************************************************/
+vector<int> solver::firstUIP() {
+
+    // Init
+    litMarker.clear();
+    vector<int> learnt;
+    int todoNum = _resolve(conflictingClsID, -1, learnt);
+    if( todoNum == -1 )
+        return vector<int>();
+
+    // Resolve and find 1UIP
+    int top = var._top;
+    while( todoNum > 1 ) {
+        while( litMarker.get(var.stk[top].var) == -1 )
+            --top;
+        int nowNum = _resolve(var.stk[top].src, var.stk[top].var, learnt);
+        if( nowNum == -1 )
+            return vector<int>();
+        todoNum += nowNum - 1;
+        --top;
+    }
+    while( litMarker.get(var.stk[top].var) == -1 )
+        --top;
+    int uip = (var.stk[top].val > 0 ? -var.stk[top].var : var.stk[top].var);
+    learnt.emplace_back(uip);
+
+    return learnt;
+
+}
+
+
+/******************************************************
     Implementing Branching Heuristic
-****************************************/
+******************************************************/
 void solver::heuristicInit_no() {
     staticOrderFrom = 0;
     staticOrder.resize(maxVarIndex);

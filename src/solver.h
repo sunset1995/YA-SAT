@@ -83,6 +83,8 @@ protected:
     inline int getVal(const WatcherInfo &info) const;
     inline bool eval(const WatcherInfo &info) const;
 
+    // Conflict Clause Learning Heuristic
+    vector<int> firstUIP();
 
     // Branching Heuristic
     int staticOrderFrom;
