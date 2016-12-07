@@ -71,6 +71,7 @@ int main(int argc, const char *argv[]) {
         fprintf(stderr, "Learnt clause     : %d\n", yasat.statistic.learnCls);
         fprintf(stderr, "Learnt assignment : %d\n", yasat.statistic.learnAssignment);
         fprintf(stderr, "Max JumpBack      : %d\n", yasat.statistic.maxJumpBack);
+        fprintf(stderr, "Max Learnt Cls Sz : %d\n", yasat.statistic.maxLearntSz);
         fprintf(stderr, "===========================================\n");
     }
 

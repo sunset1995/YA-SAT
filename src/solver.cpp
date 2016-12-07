@@ -206,7 +206,6 @@ bool solver::_solve() {
                 return false;
 
             // Resolve and find 1UIP
-            //fprintf(stderr, "nowLevel %d\n", nowLevel);
             int top = var._top;
             while( todoNum > 1 ) {
                 while( litMarker.get(var.stk[top].var) == -1 )
@@ -216,9 +215,9 @@ bool solver::_solve() {
                     return false;
                 todoNum += nowNum - 1;
                 --top;
-                while( litMarker.get(var.stk[top].var) == -1 )
-                    --top;
             }
+            while( litMarker.get(var.stk[top].var) == -1 )
+                --top;
             int uip = (var.stk[top].val > 0 ? -var.stk[top].var : var.stk[top].var);
 
             // Determined cronological backtracking
@@ -244,6 +243,7 @@ bool solver::_solve() {
 
             // Add conflict clause
             learnt.emplace_back(uip);
+            statistic.maxLearntSz = max(statistic.maxLearntSz, int(learnt.size()));
             clauses.push_back(Clause());
             clauses.back().watcher[0] = towatch;
             clauses.back().watcher[1] = learnt.size() - 1;

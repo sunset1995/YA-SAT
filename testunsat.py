@@ -25,6 +25,8 @@ for scale in dirnames:
     TOTALLEANRTASS = 0
     MAXJUMPBACK = 0
     TOTALJUMPBACK = 0
+    MAXLEANRTSZ = 0
+    TOTALLEANRTSZ = 0
 
     for problem in problems:
         if problem.find('.cnf') == -1:
@@ -50,6 +52,7 @@ for scale in dirnames:
         nowLearnCls = [int(v) for v in statistic[4].split() if v.isdigit()][0]
         nowLearnAss = [int(v) for v in statistic[5].split() if v.isdigit()][0]
         nowJumpBack = [int(v) for v in statistic[6].split() if v.isdigit()][0]
+        nowLearntSz = [int(v) for v in statistic[7].split() if v.isdigit()][0]
         MAXTIME = max(MAXTIME, nowTime)
         TOTALTIME = TOTALTIME + nowTime
         MAXBACKTRACKNUM = max(MAXBACKTRACKNUM, nowBacktrackNum)
@@ -62,6 +65,8 @@ for scale in dirnames:
         TOTALLEANRTASS = TOTALLEANRTASS + nowLearnAss
         MAXJUMPBACK = max(MAXJUMPBACK, nowJumpBack)
         TOTALJUMPBACK = TOTALJUMPBACK + nowJumpBack
+        MAXLEANRTSZ = max(MAXLEANRTSZ, nowLearntSz)
+        TOTALLEANRTSZ = TOTALLEANRTSZ + nowLearntSz
 
     print('SAT', SAT, '/ UNSAT', UNSAT, '/ ERROR', ERROR)
     print('\nTime for SAT Solver')
@@ -74,11 +79,14 @@ for scale in dirnames:
     print('   avg', int(TOTALDEPTH/(SAT + UNSAT)))
     print('   max', MAXDEPTH)
     print('\nLearnt clause')
-    print('   avg', int(TOTALLEANRTCLS/(SAT + UNSAT)))
+    print('   avg', TOTALLEANRTCLS/(SAT + UNSAT))
     print('   max', MAXLEANRTCLS)
     print('\nLearnt assignment')
-    print('   avg', int(TOTALLEANRTASS/(SAT + UNSAT)))
+    print('   avg', TOTALLEANRTASS/(SAT + UNSAT))
     print('   max', MAXLEANRTASS)
     print('\nMax jump back')
     print('   avg', int(TOTALJUMPBACK/(SAT + UNSAT)))
     print('   max', MAXJUMPBACK)
+    print('\nMax learnt sz')
+    print('   avg', int(TOTALLEANRTSZ/(SAT + UNSAT)))
+    print('   max', MAXLEANRTSZ)
