@@ -85,6 +85,8 @@ protected:
 
     // Conflict Clause Learning Heuristic
     vector<int> firstUIP();
+    void minimizeLearntCls(vector<int> &learnt);
+    bool isFromUIP(int vid, int sign);
 
     // Branching Heuristic
     int staticOrderFrom;

@@ -297,12 +297,80 @@ vector<int> solver::firstUIP() {
         todoNum += nowNum - 1;
         --top;
     }
+
+    // Put 1UIP at back of the vector
     while( litMarker.get(var.stk[top].var) == -1 )
         --top;
     int uip = (var.stk[top].val > 0 ? -var.stk[top].var : var.stk[top].var);
     learnt.emplace_back(uip);
 
+    // Minimization
+    //minimizeLearntCls(learnt);
+
     return learnt;
+
+}
+
+void solver::minimizeLearntCls(vector<int> &learnt) {
+
+    // Minimize clause
+    litMarker.clear();
+    for(int i=0; i<learnt.size(); ++i)
+        litMarker.set(abs(learnt[i]), learnt[i]>0);
+    vector<int> eliminateMark(learnt.size(), false);
+    int eliminateNum = 0;
+
+    // Check all literals in learnt clause except 1UIP
+    for(int i=learnt.size()-2; i>=0; --i) {
+        int src = var.getSrc(abs(learnt[i]));
+        if( src == -1 )
+            continue;
+
+        bool selfSubsumed = true;
+        for(int j=0; j<clauses[src].size(); ++j) {
+            int vid = clauses[src].getVar(j);
+            int sign = clauses[src].getSign(j)>0;
+            if( abs(learnt[i])!=vid && !isFromUIP(vid, sign) ) {
+                selfSubsumed = false;
+                break;
+            }
+        }
+        if( selfSubsumed ) {
+            ++eliminateNum;
+            eliminateMark[i] = true;
+        }
+    }
+    if( eliminateNum ) {
+        int j = -1;
+        for(int i=0; i<learnt.size(); ++i)
+            if( eliminateMark[i] == false )
+                learnt[++j] = learnt[i];
+        learnt.resize(j+1);
+    }
+
+}
+
+bool solver::isFromUIP(int vid, int sign) {
+
+    if( litMarker.get(vid) != -1 )
+        return litMarker.get(vid) == sign;
+
+    int src = var.getSrc(vid);
+    if( src == -1 ) {
+        litMarker.set(vid, 2);
+        return false;
+    }
+
+    for(int i=0; i<clauses[src].size(); ++i) {
+        int nv = clauses[src].getVar(i);
+        int ns = clauses[src].getSign(i);
+        if( nv!=vid && isFromUIP(nv, ns) == false ) {
+            litMarker.set(vid, 2);
+            return false;
+        }
+    }
+    litMarker.set(vid, sign);
+    return true;
 
 }
 
