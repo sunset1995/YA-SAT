@@ -69,9 +69,10 @@ int main(int argc, const char *argv[]) {
         fprintf(stderr, "Backtrack num     : %d\n", yasat.statistic.backtrackNum);
         fprintf(stderr, "Max depth         : %d\n", yasat.statistic.maxDepth);
         fprintf(stderr, "Learnt clause     : %d\n", yasat.statistic.learnCls);
+        fprintf(stderr, "Avg Learnt Cls Sz : %.2f\n", yasat.statistic.learnCls ? double(yasat.statistic.totalLearntSz)/yasat.statistic.learnCls : 0);
+        fprintf(stderr, "Max Learnt Cls Sz : %d\n", yasat.statistic.maxLearntSz);
         fprintf(stderr, "Learnt assignment : %d\n", yasat.statistic.learnAssignment);
         fprintf(stderr, "Max JumpBack      : %d\n", yasat.statistic.maxJumpBack);
-        fprintf(stderr, "Max Learnt Cls Sz : %d\n", yasat.statistic.maxLearntSz);
         fprintf(stderr, "===========================================\n");
     }
 

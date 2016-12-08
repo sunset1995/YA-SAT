@@ -10,8 +10,9 @@ struct Statistic {
     int maxDepth = 0;
     int learnAssignment = 0;
     int learnCls = 0;
-    int maxJumpBack = 0;
     int maxLearntSz = 0;
+    long long totalLearntSz = 0;
+    int maxJumpBack = 0;
     struct timeval start, end;
 
     // Init and start counter

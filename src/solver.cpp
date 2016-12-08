@@ -239,6 +239,7 @@ bool solver::_solve() {
 
             // Add conflict clause
             statistic.maxLearntSz = max(statistic.maxLearntSz, int(learnt.size()));
+            statistic.totalLearntSz += learnt.size();
             clauses.push_back(Clause());
             clauses.back().watcher[0] = towatch;
             clauses.back().watcher[1] = learnt.size() - 1;
