@@ -91,7 +91,8 @@ bool solver::set(int id, bool val, int src) {
 
     // Update 2 literal watching
     vector<WatcherInfo> &lst = (val ? neg[id] : pos[id]);
-    for(int i=lst.size()-1; i>=0; --i) {
+    int i = 0;
+    while( i<lst.size() ) {
 
         // Update watcher
         updateClauseWatcher(lst[i]);
@@ -123,6 +124,8 @@ bool solver::set(int id, bool val, int src) {
                 conflictingClsID = lst[i].clsid;
                 return false;
             }
+
+            ++i;
 
         }
 
