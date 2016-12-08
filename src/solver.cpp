@@ -90,9 +90,10 @@ bool solver::set(int id, bool val, int src) {
     var.set(id, val, nowLevel, src);
 
     // Update 2 literal watching
+    bool ret = true;
     vector<WatcherInfo> &lst = (val ? neg[id] : pos[id]);
-    int i = 0;
-    while( i<lst.size() ) {
+    vector<int> del(lst.size(), false);
+    for(int i=0; i<lst.size(); ++i) {
 
         // Update watcher
         updateClauseWatcher(lst[i]);
@@ -106,8 +107,7 @@ bool solver::set(int id, bool val, int src) {
                 neg[getVar(lst[i])].emplace_back(lst[i]);
 
             // Delete this watcher from current check list
-            swap(lst[i], lst.back());
-            lst.pop_back();
+            del[i] = true;
 
         }
         else {
@@ -117,22 +117,32 @@ bool solver::set(int id, bool val, int src) {
             // b = alternative watcher in this clause
             WatcherInfo b(lst[i].clsid, lst[i].wid^1);
             if( getVal(b) == 2 ) {
-                if( !set(getVar(b), getSign(b), lst[i].clsid) )
-                    return false;
+                if( !set(getVar(b), getSign(b), lst[i].clsid) ) {
+                    ret = false;
+                    break;
+                }
             }
             else if( !eval(b) ) {
                 conflictingClsID = lst[i].clsid;
-                return false;
+                ret =  false;
+                break;
             }
-
-            ++i;
 
         }
 
     }
 
+    int i = 0, j = -1;
+    while( i<lst.size() && !del[i] )
+        ++i;
+    j = i-1;
+    for(; i<lst.size(); ++i)
+        if( !del[i] )
+            lst[++j] = lst[i];
+    lst.resize(j+1);
+
     // BCP done successfully without conflict
-    return true;
+    return ret;
 
 }
 
