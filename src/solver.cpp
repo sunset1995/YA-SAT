@@ -305,7 +305,7 @@ vector<int> solver::firstUIP() {
     learnt.emplace_back(uip);
 
     // Minimization
-    //minimizeLearntCls(learnt);
+    minimizeLearntCls(learnt);
 
     return learnt;
 
