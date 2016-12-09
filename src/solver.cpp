@@ -151,7 +151,7 @@ bool solver::solve(int mode) {
 
     // Init statistic and start timer
     statistic.init();
-    if( unsatAfterInit ) return false;
+    if( unsatAfterInit ) return sat = false;
 
     // Init DPLL
     litMarker.init(maxVarIndex+4);

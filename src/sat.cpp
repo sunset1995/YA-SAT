@@ -97,11 +97,12 @@ int main(int argc, const char *argv[]) {
         freopen(filename, "w", stdout);
     }
 
-    if( yasat.sat ) {
+    vector<int> result = yasat.result();
+    if( result[0] ) {
         puts("s SATISFIABLE");
         putchar('v');
-        for(int i=1; i<=yasat.maxVarIndex; ++i)
-            printf(" %d", yasat.var.getVal(i) ? i : -i);
+        for(int i=1; i<=result.size(); ++i)
+            printf(" %d", result[i]);
         puts(" 0");
     }
     else {

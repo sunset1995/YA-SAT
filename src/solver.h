@@ -26,13 +26,22 @@ public:
         HEURISTIC_NO = 1011,
         HEURISTIC_MOM = 1012,
     };
+    Statistic statistic;
+
+    // Init via CNF file and seperate independent subproblems
+    void init(const char *filename);
+    bool solve(int mode);
+    inline vector<int> result();
+
+
+protected:
+
     struct WatcherInfo {
         int clsid, wid;
         WatcherInfo() {};
         WatcherInfo(int clsid, int wid)
         :clsid(clsid), wid(wid) {}
     };
-    Statistic statistic;
     int unsatAfterInit = 0;
     int sat = 0;
 
@@ -43,17 +52,14 @@ public:
     int nowSetID = 0;
     int nowLevel = 0;
 
+    // Each subproblem a solver
+    vector<solver> subproblem;
+    vector<int> mappingVar;
+    void _init(const vector<Clause> &rth);
 
-    // Main function
-    void init(const char *filename);
-
+    // Helper function for DPLL
     bool set(int var, bool val, int src=-1);
     void backToLevel(int lv);
-
-    bool solve(int mode);
-
-
-protected:
 
     bool _solve();
     int conflictingClsID = -1;
@@ -99,6 +105,16 @@ protected:
 
 };
 
+
+// Return result
+inline vector<int> solver::result() {
+    if( !sat )
+        return vector<int>(1, 0);
+    vector<int> ret(maxVarIndex+1, 1);
+    for(int i=1; i<=maxVarIndex; ++i)
+        ret[i] = var.getVal(i) ? i : -i;
+    return ret;
+}
 
 // Resolve helper
 inline int solver::_resolve(int clsid, int x, vector<int> &prev) {
