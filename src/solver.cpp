@@ -22,14 +22,88 @@ void solver::init(const char *filename) {
     // Get raw clause from cnf file
     vector< vector<int> > raw;
     parse_DIMACS_CNF(raw, maxVarIndex, filename);
+    var = opStack(maxVarIndex+4);
+
+    // Identify independent subproblem via disjoint set
+    DisjointSet dset;
+    dset.init(maxVarIndex+4);
+    for(auto &cls : raw) 
+        for(int i=1,rid=abs(cls[0]); i<cls.size(); ++i)
+            dset.unionSet(rid, abs(cls[i]));
+
+    // Find all root of disjointset
+    int nInd = 0;
+    vector<int> roots;
+    for(int i=1; i<=maxVarIndex; ++i)
+        if( dset.findRoot(i) == i ) {
+            ++nInd;
+            roots.emplace_back(i);
+        }
+
+    // If all variables are related, treat as independent subproblem
+    if( nInd <= 1 ) {
+        _init(raw, maxVarIndex);
+        return;
+    }
+
+    // Sort via # of variables
+    sort(roots.begin(), roots.end(), [&dset](const int l, const int r) {
+        return dset.setSz(l) < dset.setSz(r);
+    });
+
+    // Mapping variables to each subproblem's id
+    vector<int> pid(maxVarIndex+4);
+    for(int i=0; i<nInd; ++i)
+        pid[roots[i]] = i;
+    for(int i=1; i<=maxVarIndex; ++i)
+        pid[i] = pid[dset.findRoot(i)];
+
+    // Mapping between global variables and local variables
+    mappingVar.resize(nInd);
+    for(int i=0; i<nInd; ++i) {
+        mappingVar[i].resize(dset.setSz(roots[i])+1, -1);
+    }
+    vector<int> num(nInd, 0);
+    vector<int> backmp(maxVarIndex+4);
+    for(int i=1; i<=maxVarIndex; ++i) {
+        ++num[pid[i]];
+        mappingVar[ pid[i] ][ num[pid[i]] ] = i;
+        backmp[i] = num[pid[i]];
+    }
+
+    // Split cnf into independent subsets
+    vector< vector< vector<int> > > cls(nInd);
+    for(int i=0; i<raw.size(); ++i)
+        cls[pid[abs(raw[i][0])]].emplace_back(move(raw[i]));
+
+    // Init each subproblems
+    subproblem.resize(nInd);
+    for(int i=0; i<nInd && !unsatAfterInit; ++i) {
+        if( cls[i].empty() )
+            continue;
+        for(auto &c : cls[i]) {
+            for(auto &v : c)
+                v = (v > 0 ? backmp[abs(v)] : -backmp[abs(v)]);
+        }
+        subproblem[i]._init(move(cls[i]), dset.setSz(roots[i]));
+        unsatAfterInit |= subproblem[i].unsatAfterInit;
+    }
+
+}
+
+void solver::_init(const vector< vector<int> > &rth, int maxIdx) {
+
+    // Init with empty solver
+    *this = solver();
 
     // Init assignment stack
+    maxVarIndex = maxIdx;
     var = opStack(maxVarIndex+4);
 
     // Init database with all clause which has 2 or more literal in raw database
     // Eliminate all unit clause and check whether there is empty clause
     vector<int> unit;
-    for(auto &cls : raw) {
+    for(auto &cls : rth) {
         if( cls.empty() ) unsatAfterInit = 1;
         else if( cls.size() == 1 ) unit.emplace_back(cls[0]);
         else if( !satisfyAlready(cls) ) {
@@ -62,17 +136,6 @@ void solver::init(const char *filename) {
     // Assign and run BCP for all unit clause
     for(auto lit : unit)
         unsatAfterInit |= !set(abs(lit), lit>0);
-
-    // Identify independent subproblem via disjoint set
-    dset.init(maxVarIndex+4);
-    for(auto &cls : clauses) {
-        int id = 0;
-        while( id<cls.size() && var.getVal(cls.getVar(id))!=2 )
-            ++id;
-        for(int i=id+1; i<cls.size(); ++i)
-            if( var.getVal(cls.getVar(i))==2 )
-                dset.unionSet(cls.getVar(i), cls.getVar(id));
-    }
 
 }
 
@@ -153,17 +216,10 @@ bool solver::solve(int mode) {
     statistic.init();
     if( unsatAfterInit ) return sat = false;
 
-    // Init DPLL
-    litMarker.init(maxVarIndex+4);
-    sat = true;
-    nowLevel = 0;
-
-    // Solve each independent subproblems
-    for(int i=1; i<=maxVarIndex && sat; ++i) {
-
-        if( dset.findRoot(i) != i ) continue;
-
-        nowSetID = i;
+    if( subproblem.empty() ) {
+        // This solver itself is an independent subproblem
+        litMarker.init(maxVarIndex+4);
+        nowLevel = 0;
 
         // Init for specific heuristic
         // This must be done before each subproblems
@@ -179,20 +235,34 @@ bool solver::solve(int mode) {
             fprintf(stderr, "Unknown solver mode\n");
             exit(1);
         }
-
-        sat &= _solve();
-
+        sat = _solve();
     }
-    statistic.stopTimer();
+    else {
+        // Top level containing multiple subproblems
+        for(int i=0; i<subproblem.size(); ++i) {
 
+            if( subproblem[i].clauses.empty() )
+                continue;
+
+            subproblem[i].solve(mode);
+            vector<int> result = subproblem[i].result();
+            if( result[0] == 0 ) {
+                subproblem[i].printCNF();
+                sat = false;
+                break;
+            }
+            const vector<int> &mp = mappingVar[i];
+            for(int j=1; j<result.size(); ++j)
+                var.set(mp[j], result[j]>0, 0, -1);
+        }
+    }
+
+    statistic.stopTimer();
     return sat;
 
 }
 
 bool solver::_solve() {
-
-    // This subproblem startting stack index
-    const int bound = nowLevel;
 
     // Main loop for DPLL
     while( true ) {
@@ -216,7 +286,7 @@ bool solver::_solve() {
                 return false;
 
             // Determined cronological backtracking
-            int backlv = bound;
+            int backlv = 0;
             int towatch = -1;
             for(int i=learnt.size()-2; i>=0; --i)
                 if( var.getLv(abs(learnt[i])) > backlv ) {
@@ -225,12 +295,12 @@ bool solver::_solve() {
                 }
 
             // Learn one assignment
-            if( learnt.size() == 1 || backlv == bound ) {
+            if( learnt.size() == 1 || backlv == 0 ) {
                 ++statistic.backtrackNum;
                 ++statistic.learnAssignment;
-                var.backToLevel(bound);
-                statistic.maxJumpBack = max(statistic.maxJumpBack, nowLevel-bound);
-                nowLevel = bound;
+                var.backToLevel(0);
+                statistic.maxJumpBack = max(statistic.maxJumpBack, nowLevel);
+                nowLevel = 0;
                 int uip = learnt.back();
                 if( !set(abs(uip), uip>0) )
                     return false;
@@ -404,10 +474,7 @@ void solver::heuristicInit_MOM() {
                 ++scoreNeg[cls.getVar(i)];
     }
     for(int i=1; i<=maxVarIndex; ++i) {
-        if( dset.sameSet(i, nowSetID) )
-            score[i] = scorePos[i] + scoreNeg[i];
-        else
-            score[i] = -1;
+        score[i] = scorePos[i] + scoreNeg[i];
     }
     sort(staticOrder.begin(), staticOrder.end(), [&score](const pii &l, const pii &r) {
         return score[l.first] > score[r.first];
@@ -419,8 +486,7 @@ void solver::heuristicInit_MOM() {
 
 pair<int,int> solver::heuristic_static() {
     for(int i=staticOrderFrom; i<staticOrder.size(); ++i)
-        if( var.getVal(staticOrder[i].first)==2 &&
-                dset.sameSet(staticOrder[i].first, nowSetID) ) {
+        if( var.getVal(staticOrder[i].first)==2 ) {
             staticOrderFrom = i+1;
             return staticOrder[i];
         }

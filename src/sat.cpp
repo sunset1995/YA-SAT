@@ -101,7 +101,7 @@ int main(int argc, const char *argv[]) {
     if( result[0] ) {
         puts("s SATISFIABLE");
         putchar('v');
-        for(int i=1; i<=result.size(); ++i)
+        for(int i=1; i<result.size(); ++i)
             printf(" %d", result[i]);
         puts(" 0");
     }

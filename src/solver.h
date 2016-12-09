@@ -32,6 +32,7 @@ public:
     void init(const char *filename);
     bool solve(int mode);
     inline vector<int> result();
+    inline void printCNF();
 
 
 protected:
@@ -43,19 +44,17 @@ protected:
         :clsid(clsid), wid(wid) {}
     };
     int unsatAfterInit = 0;
-    int sat = 0;
+    int sat = 1;
 
     int maxVarIndex;
     vector<Clause> clauses;
     opStack var;
-    DisjointSet dset;
-    int nowSetID = 0;
     int nowLevel = 0;
 
     // Each subproblem a solver
     vector<solver> subproblem;
-    vector<int> mappingVar;
-    void _init(const vector<Clause> &rth);
+    vector< vector<int> > mappingVar;
+    void _init(const vector< vector<int> > &rth, int maxIdx);
 
     // Helper function for DPLL
     bool set(int var, bool val, int src=-1);
@@ -115,6 +114,15 @@ inline vector<int> solver::result() {
         ret[i] = var.getVal(i) ? i : -i;
     return ret;
 }
+
+inline void solver::printCNF() {
+    for(auto &cls : clauses) {
+        for(int i=0; i<cls.size(); ++i)
+            printf("%d ", cls.getLit(i));
+        printf("0\n");
+    }
+}
+
 
 // Resolve helper
 inline int solver::_resolve(int clsid, int x, vector<int> &prev) {
