@@ -6,6 +6,7 @@ benchmarks
 yasat
 debug
 hornSatChecker
+numOfIndCls
 preprocess.py
 courses
 
