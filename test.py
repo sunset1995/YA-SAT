@@ -10,6 +10,7 @@ if len(sys.argv) != 2:
 SAT = 0
 UNSAT = 0
 ERROR = 0
+TIMEOUT = 0
 
 title = []
 statistic = []
@@ -27,8 +28,15 @@ for dirname, dirnames, filenames in os.walk(sys.argv[1]):
             os.path.join(dirname, filename)],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,)
-        proc.wait()
-        result = str(proc.stdout.read())
+        try:
+            outs, errs = proc.communicate(input=None, timeout=1200)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            outs, errs = proc.communicate()
+            TIMEOUT += 1
+            print('TIMEOUT\n')
+            continue
+        result = str(outs)
 
         if proc.returncode != 0:
             ERROR = ERROR + 1
@@ -41,7 +49,7 @@ for dirname, dirnames, filenames in os.walk(sys.argv[1]):
             SAT = SAT + 1
 
         # Read statistic
-        nowStat = str(proc.stderr.read()).split('\\n')
+        nowStat = str(errs).split('\\n')
 
         # Check init
         if len(statistic)==0:
@@ -61,7 +69,7 @@ for dirname, dirnames, filenames in os.walk(sys.argv[1]):
 
 
 print(" statistic ".center(70, "-"))
-print('SAT', SAT, '/ UNSAT', UNSAT, '/ ERROR', ERROR)
+print('SAT', SAT, '/ UNSAT', UNSAT, '/ ERROR', ERROR, '/ TIMEOUT', TIMEOUT)
 for i in range(1, len(statistic)-2):
     print("%s : %10.2f / %10.2f" % (title[i], statistic[i][0]/(SAT + UNSAT), statistic[i][1]))
 print("".center(70, "="))
