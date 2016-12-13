@@ -3,6 +3,8 @@ import os
 import sys
 import subprocess
 
+solver = './yasat' if len(sys.argv)<2 else sys.argv[1]
+
 print(" ALL UNSAT ".center(50, "="))
 basename = 'benchmarks/UNSAT'
 _, dirnames, _ = tuple(os.walk(basename))[0]
@@ -24,12 +26,19 @@ for scale in dirnames:
         if problem.find('.cnf') == -1:
             continue
         proc = subprocess.Popen([
-            './yasat', '-stdout', '-statistic',
+            solver, '-stdout', '-statistic',
             "%s/%s/%s" % (basename, scale, problem)],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,)
-        proc.wait()
-        result = str(proc.stdout.read())
+        try:
+            outs, errs = proc.communicate(input=None, timeout=1200)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            outs, errs = proc.communicate()
+            TIMEOUT += 1
+            print('TIMEOUT\n')
+            continue
+        result = str(outs)
 
 
         # Read SAT/UNSAT/ERROR
@@ -43,7 +52,7 @@ for scale in dirnames:
 
 
         # Read statistic
-        nowStat = str(proc.stderr.read()).split('\\n')
+        nowStat = str(errs).split('\\n')
 
         # Check init
         if len(statistic)==0:

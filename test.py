@@ -3,9 +3,11 @@ import os
 import sys
 import subprocess
 
-if len(sys.argv) != 2:
+if len(sys.argv) < 2:
     print('python3 test.py testbenchDir')
     exit(0)
+
+solver = './yasat' if len(sys.argv)<3 else sys.argv[2]
 
 SAT = 0
 UNSAT = 0
@@ -24,7 +26,7 @@ for dirname, dirnames, filenames in os.walk(sys.argv[1]):
 
         print(os.path.join(dirname, filename).center(70, "-"))
         proc = subprocess.Popen([
-            './yasat', '-stdout', '-statistic',
+            solver, '-stdout', '-statistic',
             os.path.join(dirname, filename)],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,)
