@@ -24,7 +24,7 @@ for dirname, dirnames, filenames in os.walk(sys.argv[1]):
         if filename.find('.cnf') == -1:
             continue
 
-        print(os.path.join(dirname, filename).center(70, "-"))
+        print(os.path.join(dirname, filename).center(70, "-"), flush=True)
         proc = subprocess.Popen([
             solver, '-stdout', '-statistic',
             os.path.join(dirname, filename)],

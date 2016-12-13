@@ -10,7 +10,7 @@ basename = 'benchmarks/SAT'
 _, dirnames, _ = tuple(os.walk(basename))[0]
 for scale in dirnames:
     print("")
-    print(scale.center(50, "-"))
+    print(scale.center(50, "-"), flush=True)
     _, _, problems = tuple(os.walk('%s/%s' % (basename, scale)))[0]
 
     SAT = 0
