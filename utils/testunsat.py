@@ -18,10 +18,12 @@ for scale in dirnames:
     SAT = 0
     UNSAT = 0
     ERROR = 0
+    TIMEOUT = 0
 
     title = []
     statistic = []
 
+    problems.sort(key=lambda x: natsort_keygen(alg=ns.IGNORECASE)(x))
     for problem in problems:
 
         # Run only .cnf files
