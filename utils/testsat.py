@@ -40,7 +40,6 @@ for scale in dirnames:
             proc.kill()
             outs, errs = proc.communicate()
             TIMEOUT += 1
-            print('TIMEOUT\n')
             continue
         result = str(outs)
 
@@ -71,7 +70,7 @@ for scale in dirnames:
             statistic[i][0] += nowVal
             statistic[i][1] = max(nowVal, statistic[i][1])
 
-    print('SAT', SAT, '/ UNSAT', UNSAT, '/ ERROR', ERROR)
+    print('SAT', SAT, '/ UNSAT', UNSAT, '/ ERROR', ERROR, '/ TIMEOUT', TIMEOUT)
     for i in range(1, len(statistic)-2):
         print("%s : %10.2f / %10.2f" % (title[i], statistic[i][0]/(SAT + UNSAT), statistic[i][1]))
 
