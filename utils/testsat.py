@@ -2,12 +2,14 @@ import re
 import os
 import sys
 import subprocess
+from natsort import natsort_keygen, ns
 
 solver = './yasat' if len(sys.argv)<2 else sys.argv[1]
 
 print(" ALL SAT ".center(50, "="))
 basename = 'benchmarks/SAT'
 _, dirnames, _ = tuple(os.walk(basename))[0]
+dirnames.sort(key=lambda x: natsort_keygen(alg=ns.IGNORECASE)(x))
 for scale in dirnames:
     print("")
     print(scale.center(50, "-"), flush=True)

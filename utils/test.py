@@ -2,6 +2,7 @@ import re
 import os
 import sys
 import subprocess
+from natsort import natsort_keygen, ns
 
 if len(sys.argv) < 2:
     print('python3 test.py testbenchDir')
@@ -18,6 +19,8 @@ title = []
 statistic = []
 
 for dirname, dirnames, filenames in os.walk(sys.argv[1]):
+
+    filenames.sort(key=lambda x: natsort_keygen(alg=ns.IGNORECASE)(x))
     for filename in filenames:
         
         # Run only .cnf files
