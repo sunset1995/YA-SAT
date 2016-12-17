@@ -29,15 +29,13 @@ for resultFile in sys.argv[1:]:
     parse(resultSAT[2:-2])
 
 # Print result
-width1 = 0
-width2 = 0
-
 for catego, datas in categories.items():
+    width1 = 0
+    width2 = 0
     for data in datas:
         width1 = max(width1, len(data[0]))
         width2 = max(width2, len(data[1]))
 
-for catego, datas in categories.items():
     print('### %s' % catego)
     datas.sort(key=lambda x: natsort_keygen(alg=ns.IGNORECASE)(x))
     for data in datas:
