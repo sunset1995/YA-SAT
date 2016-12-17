@@ -7,8 +7,8 @@ yasat
 debug
 hornSatChecker
 numOfIndCls
-preprocess.py
 courses
+minisat
 
 # Compiled Object files
 *.slo
