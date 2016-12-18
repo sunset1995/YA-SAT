@@ -2,6 +2,21 @@
 Yet Another SAT Solver. Term project of PACA.
 
 
+## Tasks
+
+### TODO
+- Iterative BCP
+- Decision BCP result cache
+- Marked Learnt Clause
+
+### DONE
+- 2 Literal Watching
+- Iterative DPLL
+- Conflict Clause Learning
+- Nonchronological Backtracking
+- Learnt Clause Minimization
+
+
 ## How to
 - To build `./build.sh`  
 - To run `./yasat [options] benchmark.cnf`  
@@ -23,62 +38,59 @@ Yet Another SAT Solver. Term project of PACA.
 Beside testcases provied by PACA, I also use online benchmark problems from [SATLIB](http://www.cs.ubc.ca/~hoos/SATLIB/benchm.html).  
 `sat/100-430` means 100 variables and 430 clauses.  
 I implement _two literal watching_ before recursive. So even the simplest version has _two literal watching_ and _Unit Clause Rule_.  
+Run-times obtained on a ??? running at 2.1 GHz.  
 
 ### Elapsed time
-Only time on SAT solver's _\_solve_ function is counted, excluding parsing time, init time.  
+Only time took by SAT solver is counted, excluding parsing time, init time.  
 
-| Scale | # instances | No(avg/max) | MOM | JW |
-| ---- | ----: | ----: | ----: | ----: |
-| sat/sanity | 2 | 0/0 | 0/0 | 0/0 |
-| sat/tiny | 2 | 0/0 | 0/0 | 0/0 |
-| sat/20-91 | 1000 | 0/0 | 0/0 | 0/0 |
-| sat/50-218 | 1000 | 0/0 | 0/0 | 0/0.001 |
-| sat/75-325 | 100 | 0.007/0.040 | 0/0.004 | 0.001/0.003 |
-| sat/100-430 | 1000 | 0.075/1.208 | 0.002/0.016 | 0.004/0.019 |
-| sat/125-538 | 100 | 0.975/20.521 | 0.014/0.103 | 0.018/0.087 |
-| sat/150-645 | 100 | - | 0.041/0.254 | 0.058/0.403 |
-| unsat/sanity | 2 | 0/0 | 0/0 | 0/0 |
-| unsat/tiny | 2 | 0/0 | 0/0 | 0/0 |
-| unsat/50-218 | 1000 | 0.001/0.008 | 0/0.001 | 0/0.001 |
-| unsat/75-325 | 100 | 0.015/0.051 | 0.006/0.029 | 0.002/0.004 |
-| unsat/100-430 | 1000 | 0.208/2.443 | 0.001/0.004 | 0.008/0.037 |
-| unsat/125-538 | 100 | 2.294/12.759 | 0.029/0.096 | 0.036/0.137 |
-| unsat/150-645 | 100 | - | 0.144/0.659 | 0.152/0.774 |
+| Scale          |          basic |
+| -------------- | -------------: |
+| sat-20-91      |      0.00/0.00 |
+| sat-50-218     |      0.00/0.00 |
+| sat-75-325     |      0.00/0.01 |
+| sat-100-430    |      0.00/0.02 |
+| sat-125-538    |      0.02/0.07 |
+| sat-150-645    |      0.05/0.34 |
+| sat-250-1065   |   39.24/367.79 |
+| unsat-50-218   |      0.00/0.00 |
+| unsat-75-325   |      0.00/0.01 |
+| unsat-100-430  |      0.01/0.04 |
+| unsat-125-538  |      0.04/0.13 |
+| unsat-150-645  |      0.17/0.74 |
+| unsat-250-1065 | 207.99/1184.38 |
+
 
 ### Backtrack num
-| Scale | No(avg/max) | MOM | JW |
-| ---- | ----: | ----: | ----: |
-| sat/sanity | 0/0 | 0/0 | 0/0 |
-| sat/tiny | 0/0 | 0/0 | 0/0 |
-| sat/20-91 | 6/46 | 1/16 | 2/15 |
-| sat/50-218 | 184/1728 | 26/199 | 22/122 |
-| sat/75-325 | 2162/10754 | 133/661 | 109/485 |
-| sat/100-430 | 20742/352322 | 443/3861 | 422/2173 |
-| sat/125-538 | 243397/5123539 | 2399/17278 | 1974/8635 |
-| sat/150-645 | - | 6907/46221 | 5667/40963 |
-| unsat/sanity | 0/0 | 0/0 | 0/0 |
-| unsat/tiny | 6/8 | 3/4 | 3/4 |
-| unsat/50-218 | 478/3860 | 70/308 | 59/177 |
-| unsat/75-325 | 4719/17045 | 306/1316 | 237/520 |
-| unsat/100-430 | 60768/848845 | 1388/7757 | 997/3096 |
-| unsat/125-538 | 534588/2672851 | 5761/21496 | 4151/13269 |
-| unsat/150-645 | - | 25638/117297 | 15663/84435 |
+| Scale          |                basic |
+| -------------- | -------------------: |
+| sat-20-91      |           2.45/13.00 |
+| sat-50-218     |          14.32/92.00 |
+| sat-75-325     |         51.79/221.00 |
+| sat-100-430    |        156.33/869.00 |
+| sat-125-538    |       550.24/2555.00 |
+| sat-150-645    |      1395.59/7145.00 |
+| sat-250-1065   |  104605.31/550331.00 |
+| unsat-50-218   |         44.99/119.00 |
+| unsat-75-325   |        148.66/361.00 |
+| unsat-100-430  |       489.88/1351.00 |
+| unsat-125-538  |      1504.70/4004.00 |
+| unsat-150-645  |     4265.77/12745.00 |
+| unsat-250-1065 | 368849.21/1214901.00 |
+
 
 ### Search Tree Depth
-| Scale | No(avg/max) | MOM | JW |
-| ---- | ----: | ----: | ----: |
-| sat/sanity | 3/5 | 4/6 | 2/3 |
-| sat/tiny | 5/6 | 7/10 | 6/8 |
-| sat/20-91 | 8/14 | 1/17 | 6/16 |
-| sat/50-218 | 16/29 | 13/26 | 13/24 |
-| sat/75-325 | 23/33 | 18/28 | 18/28 |
-| sat/100-430 | 30/44 | 25/44 | 22/37 |
-| sat/125-538 | 37/49 | 30/45 | 27/40 |
-| sat/150-645 | - | 35/58 | 32/47 |
-| unsat/sanity | 0/0 | 0/0 | 0/0 |
-| unsat/tiny | 3/4 | 2/3 | 2/3 |
-| unsat/50-218 | 15/25 | 10/16 | 9/15 |
-| unsat/75-325 | 22/33 | 14/23 | 13/19 |
-| unsat/100-430 | 30/43 | 19/30 | 18/26 |
-| unsat/125-538 | 37/50 | 24/32 | 23/28 |
-| unsat/150-645 | - | 28/35 | 27/33 |
+| Scale          |       basic |
+| -------------- | ----------: |
+| sat-20-91      |  6.41/16.00 |
+| sat-50-218     | 11.79/26.00 |
+| sat-75-325     | 15.56/31.00 |
+| sat-100-430    | 20.18/44.00 |
+| sat-125-538    | 23.79/39.00 |
+| sat-150-645    | 27.48/51.00 |
+| sat-250-1065   | 42.63/68.00 |
+| unsat-50-218   |  7.65/14.00 |
+| unsat-75-325   | 10.78/16.00 |
+| unsat-100-430  | 13.80/21.00 |
+| unsat-125-538  | 16.92/22.00 |
+| unsat-150-645  | 19.61/26.00 |
+| unsat-250-1065 | 30.55/37.00 |

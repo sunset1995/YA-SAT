@@ -1,0 +1,101 @@
+==================== ALL SAT =====================
+
+-------------------sat-125-538--------------------
+SAT 100 / UNSAT 0 / ERROR 0
+Time on SAT solver :       0.02 /       0.07
+Backtrack num      :     550.24 /    2555.00
+Max depth          :      23.79 /      39.00
+Learnt clause      :     549.97 /    2552.00
+Avg Learnt Cls Sz  :       9.87 /      13.18
+Max Learnt Cls Sz  :      19.53 /      24.00
+Learnt assignment  :       0.27 /       5.00
+Max JumpBack       :       6.08 /      13.00
+
+-------------------sat-150-645--------------------
+SAT 100 / UNSAT 0 / ERROR 0
+Time on SAT solver :       0.05 /       0.34
+Backtrack num      :    1395.59 /    7145.00
+Max depth          :      27.48 /      51.00
+Learnt clause      :    1395.36 /    7142.00
+Avg Learnt Cls Sz  :      11.72 /      17.47
+Max Learnt Cls Sz  :      23.93 /      31.00
+Learnt assignment  :       0.23 /       3.00
+Max JumpBack       :       7.20 /      14.00
+
+--------------------sat-sanity--------------------
+SAT 2 / UNSAT 0 / ERROR 0
+Time on SAT solver :       0.00 /       0.00
+Backtrack num      :       0.00 /       0.00
+Max depth          :       4.00 /       6.00
+Learnt clause      :       0.00 /       0.00
+Avg Learnt Cls Sz  :       0.00 /       0.00
+Max Learnt Cls Sz  :       0.00 /       0.00
+Learnt assignment  :       0.00 /       0.00
+Max JumpBack       :       0.00 /       0.00
+
+-------------------sat-100-430--------------------
+SAT 1000 / UNSAT 0 / ERROR 0
+Time on SAT solver :       0.00 /       0.02
+Backtrack num      :     156.33 /     869.00
+Max depth          :      20.18 /      44.00
+Learnt clause      :     156.09 /     868.00
+Avg Learnt Cls Sz  :       8.05 /      13.00
+Max Learnt Cls Sz  :      14.82 /      21.00
+Learnt assignment  :       0.24 /       5.00
+Max JumpBack       :       4.50 /      12.00
+
+--------------------sat-20-91---------------------
+SAT 1000 / UNSAT 0 / ERROR 0
+Time on SAT solver :       0.00 /       0.00
+Backtrack num      :       2.45 /      13.00
+Max depth          :       6.41 /      16.00
+Learnt clause      :       2.18 /      11.00
+Avg Learnt Cls Sz  :       2.17 /       6.00
+Max Learnt Cls Sz  :       2.54 /       6.00
+Learnt assignment  :       0.27 /       6.00
+Max JumpBack       :       1.03 /       6.00
+
+--------------------sat-50-218--------------------
+SAT 1000 / UNSAT 0 / ERROR 0
+Time on SAT solver :       0.00 /       0.00
+Backtrack num      :      14.32 /      92.00
+Max depth          :      11.79 /      26.00
+Learnt clause      :      14.07 /      91.00
+Avg Learnt Cls Sz  :       4.57 /       9.00
+Max Learnt Cls Sz  :       6.78 /      13.00
+Learnt assignment  :       0.25 /       6.00
+Max JumpBack       :       2.30 /      12.00
+
+--------------------sat-75-325--------------------
+SAT 100 / UNSAT 0 / ERROR 0
+Time on SAT solver :       0.00 /       0.01
+Backtrack num      :      51.79 /     221.00
+Max depth          :      15.56 /      31.00
+Learnt clause      :      51.55 /     220.00
+Avg Learnt Cls Sz  :       6.35 /      12.50
+Max Learnt Cls Sz  :      10.44 /      16.00
+Learnt assignment  :       0.24 /       3.00
+Max JumpBack       :       3.43 /       9.00
+
+-------------------sat-250-1065-------------------
+SAT 100 / UNSAT 0 / ERROR 0
+Time on SAT solver :      39.24 /     367.79
+Backtrack num      :  104605.31 /  550331.00
+Max depth          :      42.63 /      68.00
+Learnt clause      :  104605.07 /  550330.00
+Avg Learnt Cls Sz  :      18.69 /      23.59
+Max Learnt Cls Sz  :      41.79 /      48.00
+Learnt assignment  :       0.24 /       2.00
+Max JumpBack       :      11.20 /      22.00
+
+---------------------sat-tiny---------------------
+SAT 2 / UNSAT 0 / ERROR 0
+Time on SAT solver :       0.00 /       0.00
+Backtrack num      :       0.00 /       0.00
+Max depth          :       7.00 /      10.00
+Learnt clause      :       0.00 /       0.00
+Avg Learnt Cls Sz  :       0.00 /       0.00
+Max Learnt Cls Sz  :       0.00 /       0.00
+Learnt assignment  :       0.00 /       0.00
+Max JumpBack       :       0.00 /       0.00
+==================================================

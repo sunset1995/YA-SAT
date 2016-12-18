@@ -1,0 +1,90 @@
+=================== ALL UNSAT ====================
+
+-------------------unsat-50-218-------------------
+SAT 0 / UNSAT 1000 / ERROR 0 / TIMEOUT 0
+Time on SAT solver :       0.00 /       0.00
+Backtrack num      :      44.99 /     119.00
+Max depth          :       7.65 /      14.00
+Learnt clause      :      40.76 /     115.00
+Avg Learnt Cls Sz  :       4.37 /       6.04
+Max Learnt Cls Sz  :       8.14 /      13.00
+Learnt assignment  :       4.22 /       9.00
+Max JumpBack       :       2.92 /       8.00
+
+-------------------unsat-75-325-------------------
+SAT 0 / UNSAT 100 / ERROR 0 / TIMEOUT 0
+Time on SAT solver :       0.00 /       0.01
+Backtrack num      :     148.66 /     361.00
+Max depth          :      10.78 /      16.00
+Learnt clause      :     143.02 /     355.00
+Avg Learnt Cls Sz  :       5.70 /       7.85
+Max Learnt Cls Sz  :      12.17 /      16.00
+Learnt assignment  :       5.64 /       9.00
+Max JumpBack       :       4.15 /       9.00
+
+------------------unsat-100-430-------------------
+SAT 0 / UNSAT 1000 / ERROR 0 / TIMEOUT 0
+Time on SAT solver :       0.01 /       0.04
+Backtrack num      :     489.88 /    1351.00
+Max depth          :      13.80 /      21.00
+Learnt clause      :     483.38 /    1344.00
+Avg Learnt Cls Sz  :       7.15 /       9.15
+Max Learnt Cls Sz  :      16.19 /      24.00
+Learnt assignment  :       6.49 /      12.00
+Max JumpBack       :       5.53 /      13.00
+
+------------------unsat-125-538-------------------
+SAT 0 / UNSAT 100 / ERROR 0 / TIMEOUT 0
+Time on SAT solver :       0.04 /       0.13
+Backtrack num      :    1504.70 /    4004.00
+Max depth          :      16.92 /      22.00
+Learnt clause      :    1497.23 /    3994.00
+Avg Learnt Cls Sz  :       8.59 /      10.09
+Max Learnt Cls Sz  :      20.29 /      25.00
+Learnt assignment  :       7.47 /      11.00
+Max JumpBack       :       6.70 /      14.00
+
+------------------unsat-150-645-------------------
+SAT 0 / UNSAT 100 / ERROR 0 / TIMEOUT 0
+Time on SAT solver :       0.17 /       0.74
+Backtrack num      :    4265.77 /   12745.00
+Max depth          :      19.61 /      26.00
+Learnt clause      :    4257.47 /   12735.00
+Avg Learnt Cls Sz  :      10.01 /      11.93
+Max Learnt Cls Sz  :      24.30 /      29.00
+Learnt assignment  :       8.30 /      12.00
+Max JumpBack       :       8.13 /      16.00
+
+------------------unsat-250-1065------------------
+SAT 0 / UNSAT 99 / ERROR 0 / TIMEOUT 1
+Time on SAT solver :     207.99 /    1184.38
+Backtrack num      :  368849.21 / 1214901.00
+Max depth          :      30.55 /      37.00
+Learnt clause      :  368836.25 / 1214886.00
+Avg Learnt Cls Sz  :      15.97 /      18.42
+Max Learnt Cls Sz  :      42.25 /      50.00
+Learnt assignment  :      12.96 /      18.00
+Max JumpBack       :      12.16 /      19.00
+
+-------------------unsat-sanity-------------------
+SAT 0 / UNSAT 2 / ERROR 0 / TIMEOUT 0
+Time on SAT solver :       0.00 /       0.00
+Backtrack num      :       0.00 /       0.00
+Max depth          :       0.00 /       0.00
+Learnt clause      :       0.00 /       0.00
+Avg Learnt Cls Sz  :       0.00 /       0.00
+Max Learnt Cls Sz  :       0.00 /       0.00
+Learnt assignment  :       0.00 /       0.00
+Max JumpBack       :       0.00 /       0.00
+
+--------------------unsat-tiny--------------------
+SAT 0 / UNSAT 2 / ERROR 0 / TIMEOUT 0
+Time on SAT solver :       0.00 /       0.00
+Backtrack num      :       3.50 /       4.00
+Max depth          :       2.00 /       2.00
+Learnt clause      :       1.50 /       2.00
+Avg Learnt Cls Sz  :       2.00 /       2.00
+Max Learnt Cls Sz  :       2.00 /       2.00
+Learnt assignment  :       2.00 /       2.00
+Max JumpBack       :       1.00 /       1.00
+==================================================
