@@ -275,8 +275,9 @@ bool solver::_solve() {
             return true;
         int vid = decision.first;
         int sign = decision.second;
+        int src = -1;
 
-        while( !set(vid, sign) ) {
+        while( !set(vid, sign, src) ) {
 
             if( conflictingClsID == -1 )
                 return false;
@@ -311,8 +312,8 @@ bool solver::_solve() {
             statistic.maxLearntSz = max(statistic.maxLearntSz, int(learnt.size()));
             statistic.totalLearntSz += learnt.size();
             clauses.push_back(Clause());
-            clauses.back().watcher[0] = towatch;
-            clauses.back().watcher[1] = learnt.size() - 1;
+            clauses.back().watcher[0] = towatch;           // Latest
+            clauses.back().watcher[1] = learnt.size() - 1; // Learnt
             clauses.back().lit = move(learnt);
 
             int cid = clauses.size() - 1;
@@ -331,10 +332,11 @@ bool solver::_solve() {
             ++statistic.backtrackNum;
             ++statistic.learnCls;
             statistic.maxJumpBack = max(statistic.maxJumpBack, nowLevel-backlv);
-            var.backToLevel(backlv-1);
+            var.backToLevel(backlv);
             nowLevel = backlv;
-            vid = var.topNext().var;
-            sign = var.topNext().val;
+            vid = clauses.back().getWatchVar(1);
+            sign = clauses.back().getWatchSign(1);
+            src = clauses.size()-1;
 
         }
 
