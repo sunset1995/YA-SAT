@@ -5,6 +5,7 @@ Yet Another SAT Solver. Term project of PACA.
 ## Tasks
 
 ### TODO
+- High performance watcher check list
 - Iterative BCP
 - Marked Learnt Clause
 
