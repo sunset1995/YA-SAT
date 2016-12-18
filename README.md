@@ -6,7 +6,6 @@ Yet Another SAT Solver. Term project of PACA.
 
 ### TODO
 - Iterative BCP
-- Decision BCP result cache
 - Marked Learnt Clause
 
 ### DONE
@@ -15,6 +14,7 @@ Yet Another SAT Solver. Term project of PACA.
 - Conflict Clause Learning
 - Nonchronological Backtracking
 - Learnt Clause Minimization
+- Decision BCP result cache
 
 
 ## How to
@@ -35,10 +35,9 @@ Yet Another SAT Solver. Term project of PACA.
     2. run `python3 testunsat.py`
 
 ## Result
-Beside testcases provied by PACA, I also use online benchmark problems from [SATLIB](http://www.cs.ubc.ca/~hoos/SATLIB/benchm.html).  
-`sat/100-430` means 100 variables and 430 clauses.  
-I implement _two literal watching_ before recursive. So even the simplest version has _two literal watching_ and _Unit Clause Rule_.  
-Run-times obtained on a ??? running at 2.1 GHz.  
+Beside testcases provied by PACA, I also test online benchmarks from [SATLIB](http://www.cs.ubc.ca/~hoos/SATLIB/benchm.html).  
+`sat-100-430` means 100 variables and 430 clauses all satisfiable.  
+Run-times obtained on Intel Pentium CPU N3540 @ 2.16GHz × 4
 
 ### Elapsed time
 Only time took by SAT solver is counted, excluding parsing time, init time.  
