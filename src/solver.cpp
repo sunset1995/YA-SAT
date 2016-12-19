@@ -12,6 +12,35 @@ static bool satisfyAlready(const vector<int> &cls) {
     return false;
 }
 
+static void appendListWatcher(vector<solver::WatcherInfo> &pool, int &head, int eleid) {
+    // Empty case
+    if( head == -1 ) {
+        head = eleid;
+        pool[eleid].prev = pool[eleid].next = eleid;
+        return;
+    }
+    int prev = pool[head].prev;
+    pool[eleid].next = head;
+    pool[eleid].prev = prev;
+    pool[prev].next = eleid;
+    pool[head].prev = eleid;
+}
+
+static void swapListWatcher(vector<solver::WatcherInfo> &pool, int &from, int &to, int eleid) {
+    // Check list head
+    if( eleid == from ) {
+        if( pool[from].next == from )
+            from = -1;
+        else
+            from = pool[eleid].next;
+    }
+    // Remove from current list
+    pool[pool[eleid].prev].next = pool[eleid].next;
+    pool[pool[eleid].next].prev = pool[eleid].prev;
+    // Add to target list
+    appendListWatcher(pool, to, eleid);
+}
+
 
 // Init solver with cnf file
 void solver::init(const char *filename) {
@@ -115,22 +144,24 @@ void solver::_init(const vector< vector<int> > &rth, int maxIdx) {
     }
 
     // Init two watching check list
-    pos = vector< vector<WatcherInfo> >(maxVarIndex+4);
-    neg = vector< vector<WatcherInfo> >(maxVarIndex+4);
-    int cid = 0;
-    for(auto &cls : clauses) {
+    watchers = vector<WatcherInfo>(clauses.size()*2);
+    pos = vector<int>(maxVarIndex+4, -1);
+    neg = vector<int>(maxVarIndex+4, -1);
+    for(int cid=0, wid=-1; cid<clauses.size(); ++cid) {
+        Clause &cls = clauses[cid];
         int id = cls.getWatchVar(0);
+        watchers[++wid] = WatcherInfo(cid, 0);
         if( cls.getWatchSign(0) )
-            pos[id].emplace_back(WatcherInfo(cid, 0));
+            appendListWatcher(watchers, pos[id], wid);
         else
-            neg[id].emplace_back(WatcherInfo(cid, 0));
+            appendListWatcher(watchers, neg[id], wid);
 
         id = cls.getWatchVar(1);
+        watchers[++wid] = WatcherInfo(cid, 1);
         if( cls.getWatchSign(1) )
-            pos[id].emplace_back(WatcherInfo(cid, 1));
+            appendListWatcher(watchers, pos[id], wid);
         else
-            neg[id].emplace_back(WatcherInfo(cid, 1));
-        ++cid;
+            appendListWatcher(watchers, neg[id], wid);
     }
 
     // Assign and run BCP for all unit clause
@@ -154,23 +185,22 @@ bool solver::set(int id, bool val, int src) {
 
     // Update 2 literal watching
     bool ret = true;
-    vector<WatcherInfo> &lst = (val ? neg[id] : pos[id]);
-    vector<int> del(lst.size(), false);
-    for(int i=0; i<lst.size(); ++i) {
+    int &head = (val ? neg[id] : pos[id]);
+    int idx = head;
+    while( idx != -1 ) {
+
+        int next = (watchers[idx].next == head ? -1 : watchers[idx].next);
 
         // Update watcher
-        updateClauseWatcher(lst[i]);
-        if( getVal(lst[i]) == 2 || eval(lst[i]) ) {
+        updateClauseWatcher(watchers[idx]);
+        if( getVal(watchers[idx]) == 2 || eval(watchers[idx]) ) {
             // Watcher reaches an pending/satisfied variable
 
             // Push this watcher to corresponding check list
-            if( getSign(lst[i]) )
-                pos[getVar(lst[i])].emplace_back(lst[i]);
+            if( getSign(watchers[idx]) )
+                swapListWatcher(watchers, head, pos[getVar(watchers[idx])], idx);
             else
-                neg[getVar(lst[i])].emplace_back(lst[i]);
-
-            // Delete this watcher from current check list
-            del[i] = true;
+                swapListWatcher(watchers, head, neg[getVar(watchers[idx])], idx);
 
         }
         else {
@@ -178,31 +208,24 @@ bool solver::set(int id, bool val, int src) {
             // Can't find next literal to watch
 
             // b = alternative watcher in this clause
-            WatcherInfo b(lst[i].clsid, lst[i].wid^1);
+            WatcherInfo b(watchers[idx].clsid, watchers[idx].wid^1);
             if( getVal(b) == 2 ) {
-                if( !set(getVar(b), getSign(b), lst[i].clsid) ) {
+                if( !set(getVar(b), getSign(b), watchers[idx].clsid) ) {
                     ret = false;
                     break;
                 }
             }
             else if( !eval(b) ) {
-                conflictingClsID = lst[i].clsid;
+                conflictingClsID = watchers[idx].clsid;
                 ret =  false;
                 break;
             }
 
         }
 
-    }
+        idx = next;
 
-    int i = 0, j = -1;
-    while( i<lst.size() && !del[i] )
-        ++i;
-    j = i-1;
-    for(; i<lst.size(); ++i)
-        if( !del[i] )
-            lst[++j] = lst[i];
-    lst.resize(j+1);
+    }
 
     // BCP done successfully without conflict
     return ret;
@@ -318,16 +341,18 @@ bool solver::_solve() {
 
             int cid = clauses.size() - 1;
             int id = clauses.back().getWatchVar(0);
+            watchers.emplace_back(WatcherInfo(cid, 0));
             if( clauses.back().getWatchSign(0) )
-                pos[id].emplace_back(WatcherInfo(cid, 0));
+                appendListWatcher(watchers, pos[id], watchers.size()-1);
             else
-                neg[id].emplace_back(WatcherInfo(cid, 0));
+                appendListWatcher(watchers, neg[id], watchers.size()-1);
 
             id = clauses.back().getWatchVar(1);
+            watchers.emplace_back(WatcherInfo(cid, 1));
             if( clauses.back().getWatchSign(1) )
-                pos[id].emplace_back(WatcherInfo(cid, 1));
+                appendListWatcher(watchers, pos[id], watchers.size()-1);
             else
-                neg[id].emplace_back(WatcherInfo(cid, 1));
+                appendListWatcher(watchers, neg[id], watchers.size()-1);
 
             ++statistic.backtrackNum;
             ++statistic.learnCls;

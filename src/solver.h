@@ -19,6 +19,13 @@ using namespace std;
 class solver {
 
 public:
+    struct WatcherInfo {
+        int clsid, wid;
+        int prev=-1, next=-1;
+        WatcherInfo() {};
+        WatcherInfo(int clsid, int wid)
+        :clsid(clsid), wid(wid) {}
+    };
 
     typedef pair<int,int> pii;
     enum {
@@ -36,13 +43,6 @@ public:
 
 
 protected:
-
-    struct WatcherInfo {
-        int clsid, wid;
-        WatcherInfo() {};
-        WatcherInfo(int clsid, int wid)
-        :clsid(clsid), wid(wid) {}
-    };
     int unsatAfterInit = 0;
     int sat = 1;
 
@@ -78,8 +78,9 @@ protected:
 
 
     // 2 Literal Watching
-    vector< vector<WatcherInfo> > pos;
-    vector< vector<WatcherInfo> > neg;
+    vector<WatcherInfo> watchers;
+    vector<int> pos;
+    vector<int> neg;
 
     // 2 Literal Watching helper function
     inline int getLit(const WatcherInfo &info) const;
