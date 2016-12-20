@@ -15,6 +15,7 @@ Yet Another SAT Solver. Term project of PACA.
 - Conflict Clause Learning
 - Nonchronological Backtracking
 - Learnt Clause Minimization
+- Split independent subproblems
 - Decision BCP result cache
 
 
