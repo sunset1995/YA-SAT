@@ -234,6 +234,75 @@ bool solver::set(int id, bool val, int src) {
 }
 
 
+// Conflicting.
+// It will backtrack to the decision level
+// where causing conflict clause become unit
+// and set vid, sign, src indicating unit variable information.
+int solver::learnFromConflict(int &vid, int &sign, int &src) {
+
+    vector<int> learnt = firstUIP();
+    if( learnt.empty() )
+        return LEARN_UNSAT;
+
+    // Determined cronological backtracking
+    int backlv = 0;
+    int towatch = -1;
+    for(int i=learnt.size()-2; i>=0; --i)
+        if( var.getLv(abs(learnt[i])) > backlv ) {
+            backlv = var.getLv(abs(learnt[i]));
+            towatch = i;
+        }
+
+    // Learn one assignment
+    if( learnt.size() == 1 || backlv == 0 ) {
+        ++statistic.backtrackNum;
+        ++statistic.learnAssignment;
+        var.backToLevel(0);
+        statistic.maxJumpBack = max(statistic.maxJumpBack, nowLevel);
+        nowLevel = 0;
+        int uip = learnt.back();
+        if( !set(abs(uip), uip>0) )
+            return LEARN_UNSAT;
+        return LEARN_ASSIGNMENT;
+    }
+
+    // Add conflict clause
+    statistic.maxLearntSz = max(statistic.maxLearntSz, int(learnt.size()));
+    statistic.totalLearntSz += learnt.size();
+    clauses.push_back(Clause());
+    clauses.back().watcher[0] = towatch;           // Latest
+    clauses.back().watcher[1] = learnt.size() - 1; // Learnt
+    clauses.back().lit = move(learnt);
+
+    int cid = clauses.size() - 1;
+    int id = clauses.back().getWatchVar(0);
+    watchers.emplace_back(WatcherInfo(cid, 0));
+    if( clauses.back().getWatchSign(0) )
+        appendListWatcher(watchers, pos[id], watchers.size()-1);
+    else
+        appendListWatcher(watchers, neg[id], watchers.size()-1);
+
+    id = clauses.back().getWatchVar(1);
+    watchers.emplace_back(WatcherInfo(cid, 1));
+    if( clauses.back().getWatchSign(1) )
+        appendListWatcher(watchers, pos[id], watchers.size()-1);
+    else
+        appendListWatcher(watchers, neg[id], watchers.size()-1);
+
+    ++statistic.backtrackNum;
+    ++statistic.learnCls;
+    statistic.maxJumpBack = max(statistic.maxJumpBack, nowLevel-backlv);
+    var.backToLevel(backlv);
+    nowLevel = backlv;
+    vid = clauses.back().getWatchVar(1);
+    sign = clauses.back().getWatchSign(1);
+    src = clauses.size()-1;
+
+    return LEARN_CLAUSE;
+
+}
+
+
 bool solver::solve(int mode) {
 
     // Init statistic and start timer
@@ -306,63 +375,11 @@ bool solver::_solve() {
             if( conflictingClsID == -1 )
                 return false;
 
-            vector<int> learnt = firstUIP();
-            if( learnt.empty() )
+            int learnResult = learnFromConflict(vid, sign, src);
+            if( learnResult == LEARN_UNSAT )
                 return false;
-
-            // Determined cronological backtracking
-            int backlv = 0;
-            int towatch = -1;
-            for(int i=learnt.size()-2; i>=0; --i)
-                if( var.getLv(abs(learnt[i])) > backlv ) {
-                    backlv = var.getLv(abs(learnt[i]));
-                    towatch = i;
-                }
-
-            // Learn one assignment
-            if( learnt.size() == 1 || backlv == 0 ) {
-                ++statistic.backtrackNum;
-                ++statistic.learnAssignment;
-                var.backToLevel(0);
-                statistic.maxJumpBack = max(statistic.maxJumpBack, nowLevel);
-                nowLevel = 0;
-                int uip = learnt.back();
-                if( !set(abs(uip), uip>0) )
-                    return false;
+            else if( learnResult == LEARN_ASSIGNMENT )
                 break;
-            }
-
-            // Add conflict clause
-            statistic.maxLearntSz = max(statistic.maxLearntSz, int(learnt.size()));
-            statistic.totalLearntSz += learnt.size();
-            clauses.push_back(Clause());
-            clauses.back().watcher[0] = towatch;           // Latest
-            clauses.back().watcher[1] = learnt.size() - 1; // Learnt
-            clauses.back().lit = move(learnt);
-
-            int cid = clauses.size() - 1;
-            int id = clauses.back().getWatchVar(0);
-            watchers.emplace_back(WatcherInfo(cid, 0));
-            if( clauses.back().getWatchSign(0) )
-                appendListWatcher(watchers, pos[id], watchers.size()-1);
-            else
-                appendListWatcher(watchers, neg[id], watchers.size()-1);
-
-            id = clauses.back().getWatchVar(1);
-            watchers.emplace_back(WatcherInfo(cid, 1));
-            if( clauses.back().getWatchSign(1) )
-                appendListWatcher(watchers, pos[id], watchers.size()-1);
-            else
-                appendListWatcher(watchers, neg[id], watchers.size()-1);
-
-            ++statistic.backtrackNum;
-            ++statistic.learnCls;
-            statistic.maxJumpBack = max(statistic.maxJumpBack, nowLevel-backlv);
-            var.backToLevel(backlv);
-            nowLevel = backlv;
-            vid = clauses.back().getWatchVar(1);
-            sign = clauses.back().getWatchSign(1);
-            src = clauses.size()-1;
 
         }
 

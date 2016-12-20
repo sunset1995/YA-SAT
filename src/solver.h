@@ -32,6 +32,9 @@ public:
         INFINITE = 1023456789,
         HEURISTIC_NO = 1011,
         HEURISTIC_MOM = 1012,
+        LEARN_UNSAT = 10,
+        LEARN_ASSIGNMENT = 11,
+        LEARN_CLAUSE = 12
     };
     Statistic statistic;
 
@@ -58,7 +61,7 @@ protected:
 
     // Helper function for DPLL
     bool set(int var, bool val, int src=-1);
-    void backToLevel(int lv);
+    int learnFromConflict(int &vid, int &sign, int &src);
 
     bool _solve();
     int conflictingClsID = -1;
