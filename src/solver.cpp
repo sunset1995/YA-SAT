@@ -189,18 +189,19 @@ bool solver::set(int id, bool val, int src) {
     int idx = head;
     while( idx != -1 ) {
 
-        int next = (watchers[idx].next == head ? -1 : watchers[idx].next);
+        WatcherInfo &now = watchers[idx];
+        int next = (now.next == head ? -1 : now.next);
 
         // Update watcher
-        updateClauseWatcher(watchers[idx]);
-        if( getVal(watchers[idx]) == 2 || eval(watchers[idx]) ) {
+        updateClauseWatcher(now);
+        if( getVal(now) == 2 || eval(now) ) {
             // Watcher reaches an pending/satisfied variable
 
             // Push this watcher to corresponding check list
-            if( getSign(watchers[idx]) )
-                swapListWatcher(watchers, head, pos[getVar(watchers[idx])], idx);
+            if( getSign(now) )
+                swapListWatcher(watchers, head, pos[getVar(now)], idx);
             else
-                swapListWatcher(watchers, head, neg[getVar(watchers[idx])], idx);
+                swapListWatcher(watchers, head, neg[getVar(now)], idx);
 
         }
         else {
@@ -208,15 +209,15 @@ bool solver::set(int id, bool val, int src) {
             // Can't find next literal to watch
 
             // b = alternative watcher in this clause
-            WatcherInfo b(watchers[idx].clsid, watchers[idx].wid^1);
+            WatcherInfo b(now.clsid, now.wid^1);
             if( getVal(b) == 2 ) {
-                if( !set(getVar(b), getSign(b), watchers[idx].clsid) ) {
+                if( !set(getVar(b), getSign(b), now.clsid) ) {
                     ret = false;
                     break;
                 }
             }
             else if( !eval(b) ) {
-                conflictingClsID = watchers[idx].clsid;
+                conflictingClsID = now.clsid;
                 ret =  false;
                 break;
             }
