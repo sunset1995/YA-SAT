@@ -562,7 +562,6 @@ void solver::heuristicInit_VSIDS() {
 pair<int,int> solver::heuristic_VSIDS() {
     // Find next decision
     while( true ) {
-        //fprintf(stderr, "=============> sz: %d\n", varPriQueue.size());
         if( varPriQueue.size() == 0 )
             return {-1, 0};
         int vid = abs(varPriQueue.top());

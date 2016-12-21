@@ -73,18 +73,15 @@ inline void VarHeap::pop() {
     //int var = arr[1].var;
     swapEntry(1, sz--);
     downward(1);
-    //fprintf(stderr, "=========================> pop %d(%d)\n", var, mapping[var]);
 }
 
 inline void VarHeap::restore(int var) {
     int id = mapping[var];
-    //fprintf(stderr, "try restore %d(%d)\n", var, id);
     if( id <= sz )
         return;
     ++sz;
     if( var != arr[sz].var )
         swapEntry(id, sz);
-    //fprintf(stderr, "=========================> restore %d\n", arr[sz].var);
     upward(sz);
 }
 
