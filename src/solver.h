@@ -7,6 +7,7 @@
 #include "opstack.h"
 #include "statistic.h"
 #include "lazytable.h"
+#include "heap.h"
 #include <sys/time.h>
 #include <cmath>
 #include <cstdlib>
@@ -32,6 +33,7 @@ public:
         INFINITE = 1023456789,
         HEURISTIC_NO = 1011,
         HEURISTIC_MOM = 1012,
+        HEURISTIC_VSIDS = 1014,
         LEARN_UNSAT = 10,
         LEARN_ASSIGNMENT = 11,
         LEARN_CLAUSE = 12
@@ -61,6 +63,7 @@ protected:
 
     // Helper function for DPLL
     bool set(int var, bool val, int src=-1);
+    void backtrack(int lv);
     int learnFromConflict(int &vid, int &sign, int &src);
 
     bool _solve();
@@ -100,11 +103,14 @@ protected:
     // Branching Heuristic
     int staticOrderFrom;
     vector<pii> staticOrder;
+    VarHeap varPriQueue;
     pii (solver::*pickUnassignedVar)() = NULL;
 
     void heuristicInit_no();
     void heuristicInit_MOM();
     pii heuristic_static();
+    void heuristicInit_VSIDS();
+    pair<int,int> heuristic_VSIDS();
 
 };
 

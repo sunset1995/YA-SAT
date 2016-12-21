@@ -14,7 +14,8 @@ void helpMessage() {
     puts("  -statistic: print statitic result to stderr");
     puts("  -stdout   : print result to stdout instead of file");
     puts("  -no       : don't use any heuristic");
-    puts("  -mom      : (default) use MOM branching heuristic");
+    puts("  -mom      : use MOM branching heuristic");
+    puts("  -vsids    : (default) use Variable State Independent Decaying Sum heuristic");
 }
 
 
@@ -26,7 +27,7 @@ int main(int argc, const char *argv[]) {
 
     solver yasat;
     bool statistic = false;
-    int mode = solver::HEURISTIC_MOM;
+    int mode = solver::HEURISTIC_VSIDS;
 
     // Parse input parameter
     int srcid = 0, toStdout = 0;
@@ -47,6 +48,9 @@ int main(int argc, const char *argv[]) {
         }
         else if( strcmp(argv[i], "-mom") == 0 ) {
             mode = solver::HEURISTIC_MOM;
+        }
+        else if( strcmp(argv[i], "-vsids") == 0 ) {
+            mode = solver::HEURISTIC_VSIDS;
         }
         else {
             helpMessage();

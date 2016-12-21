@@ -38,6 +38,7 @@ public:
     }
     inline void set(int id, int val, int lv, int src) {
         // Set id = val@lv
+        //fprintf(stderr, "set %d = %d@%d\n", id, val, lv);
         ++_top;
         stk[_top].var = id;
         stk[_top].val = val;
@@ -48,11 +49,9 @@ public:
     }
     inline void backToLevel(int lv) {
         // Move top pointer to that level's last assignment
+        //fprintf(stderr, "backToLevel %d\n", lv);
         _top = level[lv];
     }
-
-
-//protected:
 
     vector<int> idx;
     vector<int> level;

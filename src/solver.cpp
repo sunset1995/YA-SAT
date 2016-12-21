@@ -234,6 +234,13 @@ bool solver::set(int id, bool val, int src) {
 }
 
 
+void solver::backtrack(int lv) {
+    for(int i=var._top; i>=0 && var.stk[i].lv>lv; --i)
+        varPriQueue.restore(var.stk[i].var);
+    var.backToLevel(lv);
+}
+
+
 // Conflicting.
 // It will backtrack to the decision level
 // where causing conflict clause become unit
@@ -257,7 +264,7 @@ int solver::learnFromConflict(int &vid, int &sign, int &src) {
     if( learnt.size() == 1 || backlv == 0 ) {
         ++statistic.backtrackNum;
         ++statistic.learnAssignment;
-        var.backToLevel(0);
+        backtrack(0);
         statistic.maxJumpBack = max(statistic.maxJumpBack, nowLevel);
         nowLevel = 0;
         int uip = learnt.back();
@@ -292,7 +299,7 @@ int solver::learnFromConflict(int &vid, int &sign, int &src) {
     ++statistic.backtrackNum;
     ++statistic.learnCls;
     statistic.maxJumpBack = max(statistic.maxJumpBack, nowLevel-backlv);
-    var.backToLevel(backlv);
+    backtrack(backlv);
     nowLevel = backlv;
     vid = clauses.back().getWatchVar(1);
     sign = clauses.back().getWatchSign(1);
@@ -323,6 +330,10 @@ bool solver::solve(int mode) {
         else if( mode == HEURISTIC_MOM ) {
             heuristicInit_MOM();
             pickUnassignedVar = &solver::heuristic_static;
+        }
+        else if( mode == HEURISTIC_VSIDS ) {
+            heuristicInit_VSIDS();
+            pickUnassignedVar = &solver::heuristic_VSIDS;
         }
         else {
             fprintf(stderr, "Unknown solver mode\n");
@@ -536,4 +547,28 @@ pair<int,int> solver::heuristic_static() {
             return staticOrder[i];
         }
     return {-1, 0};
+}
+
+void solver::heuristicInit_VSIDS() {
+    varPriQueue.init(maxVarIndex);
+    for(auto &cls : clauses)
+        for(int i=0; i<cls.size(); ++i)
+            varPriQueue.increaseInitPri(cls.getVar(i), 1.0);
+    for(int i=1; i<=maxVarIndex; ++i)
+        varPriQueue.increaseInitPri(i, double(rand()) / RAND_MAX);
+    varPriQueue.heapify();
+}
+
+pair<int,int> solver::heuristic_VSIDS() {
+    // Find next decision
+    while( true ) {
+        //fprintf(stderr, "=============> sz: %d\n", varPriQueue.size());
+        if( varPriQueue.size() == 0 )
+            return {-1, 0};
+        int vid = abs(varPriQueue.top());
+        int sign = varPriQueue.top()>0;
+        varPriQueue.pop();
+        if( var.getVal(vid)==2 )
+            return {vid, sign};
+    }
 }

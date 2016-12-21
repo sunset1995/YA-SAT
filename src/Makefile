@@ -2,7 +2,7 @@
 FLAGS=-Wall -Wold-style-cast -Wformat=2 -ansi -pedantic -O3 -std=c++11
 
 # List all the .o files you need to build here
-OBJS=parser.o solver.o sat.o
+OBJS=parser.o heap.o solver.o sat.o
 EXENAME=yasat
 
 # Compile targets
