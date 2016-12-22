@@ -18,6 +18,7 @@ public:
     inline int size();
     inline int top();
     inline void pop();
+    inline int litBalance(int var);
     inline void restore(int var);
     inline void increasePri(int var, double pri, int sign);
     inline void normMaxTo(double pri);
@@ -58,8 +59,7 @@ inline int VarHeap::size() {
 }
 
 inline int VarHeap::top() {
-    if( signCnt[arr[1].var] == 0 ) return rand()%2 ? arr[1].var : -arr[1].var;
-    return signCnt[arr[1].var] ? arr[1].var : -arr[1].var;
+    return arr[1].var;
 }
 
 inline void VarHeap::swapEntry(int aid, int bid) {
@@ -76,6 +76,10 @@ inline void VarHeap::heapify() {
 inline void VarHeap::pop() {
     swapEntry(1, sz--);
     downward(1);
+}
+
+inline int VarHeap::litBalance(int var) {
+    return signCnt[var];
 }
 
 inline void VarHeap::restore(int var) {

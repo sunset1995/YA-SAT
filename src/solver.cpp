@@ -614,8 +614,9 @@ pair<int,int> solver::pickUnassignedVar() {
     while( true ) {
         if( varPriQueue.size() == 0 )
             return {-1, 0};
-        int vid = abs(varPriQueue.top());
-        int sign = varPriQueue.top()>0;
+        int vid = varPriQueue.top();
+        int num = varPriQueue.litBalance(vid);
+        int sign = num==0 ? (rand()&1) : (num>0);
         varPriQueue.pop();
         if( var.getVal(vid)==2 )
             return {vid, sign};
