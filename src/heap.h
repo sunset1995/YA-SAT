@@ -12,15 +12,15 @@ class VarHeap {
 
 public:
     void init(int maxVarIndex);
-    inline void increaseInitPri(int var, double pri);
+    inline void increaseInitPri(int var, double pri, int sign);
     inline void heapify();
     inline int size();
     inline int top();
     inline void pop();
     inline void restore(int var);
-    inline void increasePri(int var, double pri);
+    inline void increasePri(int var, double pri, int sign);
 
-//protected:
+protected:
     struct HeapEntry {
         double pri = 0;
         int var = 0;
@@ -46,8 +46,9 @@ public:
 };
 
 
-inline void VarHeap::increaseInitPri(int var, double pri) {
+inline void VarHeap::increaseInitPri(int var, double pri, int sign=1) {
     arr[mapping[var]].pri += pri;
+    signCnt[var] += (sign ? 1 : -1);
 }
 
 inline int VarHeap::size() {
@@ -55,7 +56,7 @@ inline int VarHeap::size() {
 }
 
 inline int VarHeap::top() {
-    return arr[1].var;
+    return signCnt[arr[1].var] ? arr[1].var : -arr[1].var;
 }
 
 inline void VarHeap::swapEntry(int aid, int bid) {
@@ -70,7 +71,6 @@ inline void VarHeap::heapify() {
 }
 
 inline void VarHeap::pop() {
-    //int var = arr[1].var;
     swapEntry(1, sz--);
     downward(1);
 }
@@ -85,10 +85,12 @@ inline void VarHeap::restore(int var) {
     upward(sz);
 }
 
-inline void VarHeap::increasePri(int var, double pri) {
+inline void VarHeap::increasePri(int var, double pri, int sign=1) {
     int id = mapping[var];
     arr[id].pri += pri;
-    upward(id);
+    signCnt[id] += (sign ? 1 : -1);
+    if( id <= sz )
+        upward(id);
 }
 
 

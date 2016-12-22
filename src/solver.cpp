@@ -276,6 +276,11 @@ int solver::learnFromConflict(int &vid, int &sign, int &src) {
     // Add conflict clause
     statistic.maxLearntSz = max(statistic.maxLearntSz, int(learnt.size()));
     statistic.totalLearntSz += learnt.size();
+    if( heuristicMode == HEURISTIC_VSIDS ) {
+        varScore *= 1.05;
+        for(auto &v : learnt)
+            varPriQueue.increasePri(abs(v), varScore, v>0);
+    }
     clauses.push_back(Clause());
     clauses.back().watcher[0] = towatch;           // Latest
     clauses.back().watcher[1] = learnt.size() - 1; // Learnt
@@ -312,6 +317,8 @@ int solver::learnFromConflict(int &vid, int &sign, int &src) {
 
 bool solver::solve(int mode) {
 
+    heuristicMode = mode;
+
     // Init statistic and start timer
     statistic.init();
     if( unsatAfterInit ) return sat = false;
@@ -323,22 +330,17 @@ bool solver::solve(int mode) {
 
         // Init for specific heuristic
         // This must be done before each subproblems
-        if( mode == HEURISTIC_NO ) {
+        if( mode == HEURISTIC_NO )
             heuristicInit_no();
-            pickUnassignedVar = &solver::heuristic_static;
-        }
-        else if( mode == HEURISTIC_MOM ) {
+        else if( mode == HEURISTIC_MOM )
             heuristicInit_MOM();
-            pickUnassignedVar = &solver::heuristic_static;
-        }
-        else if( mode == HEURISTIC_VSIDS ) {
+        else if( mode == HEURISTIC_VSIDS )
             heuristicInit_VSIDS();
-            pickUnassignedVar = &solver::heuristic_VSIDS;
-        }
         else {
             fprintf(stderr, "Unknown solver mode\n");
             exit(1);
         }
+        varScore = 1.0;
         sat = _solve();
     }
     else {
@@ -373,8 +375,7 @@ bool solver::_solve() {
 
         ++nowLevel;
         statistic.maxDepth = max(statistic.maxDepth, nowLevel);
-        staticOrderFrom = 0;
-        pii decision = (this->*pickUnassignedVar)();
+        pii decision = pickUnassignedVar();
         if( decision.first == -1 )
             return true;
         int vid = decision.first;
@@ -505,51 +506,13 @@ bool solver::isFromUIP(int vid, int sign) {
     Implementing Branching Heuristic
 ******************************************************/
 void solver::heuristicInit_no() {
-    staticOrderFrom = 0;
-    staticOrder.resize(maxVarIndex);
+    varPriQueue.init(maxVarIndex);
     for(int i=1; i<=maxVarIndex; ++i)
-        staticOrder[i-1] = {i, 1};
+        varPriQueue.increaseInitPri(i, double(rand()) / RAND_MAX);
+    varPriQueue.heapify();
 }
 
 void solver::heuristicInit_MOM() {
-    staticOrderFrom = 0;
-    staticOrder.resize(maxVarIndex);
-    for(int i=1; i<=maxVarIndex; ++i)
-        staticOrder[i-1] = {i, 1};
-
-    vector<long long> scorePos(maxVarIndex + 4, 0);
-    vector<long long> scoreNeg(maxVarIndex + 4, 0);
-    vector<long long> score(maxVarIndex + 4, 0);
-    for(auto &cls : clauses) {
-        if( cls.size() > 3 )
-            continue;
-        for(int i=0; i<cls.size(); ++i)
-            if( cls.getSign(i) )
-                ++scorePos[cls.getVar(i)];
-            else
-                ++scoreNeg[cls.getVar(i)];
-    }
-    for(int i=1; i<=maxVarIndex; ++i) {
-        score[i] = scorePos[i] + scoreNeg[i];
-    }
-    sort(staticOrder.begin(), staticOrder.end(), [&score](const pii &l, const pii &r) {
-        return score[l.first] > score[r.first];
-    });
-    for(auto &v : staticOrder)
-        if( scoreNeg[v.first] > scorePos[v.first] )
-            v.second = 0;
-}
-
-pair<int,int> solver::heuristic_static() {
-    for(int i=staticOrderFrom; i<staticOrder.size(); ++i)
-        if( var.getVal(staticOrder[i].first)==2 ) {
-            staticOrderFrom = i+1;
-            return staticOrder[i];
-        }
-    return {-1, 0};
-}
-
-void solver::heuristicInit_VSIDS() {
     varPriQueue.init(maxVarIndex);
     for(auto &cls : clauses)
         for(int i=0; i<cls.size(); ++i)
@@ -559,7 +522,17 @@ void solver::heuristicInit_VSIDS() {
     varPriQueue.heapify();
 }
 
-pair<int,int> solver::heuristic_VSIDS() {
+void solver::heuristicInit_VSIDS() {
+    varPriQueue.init(maxVarIndex);
+    for(auto &cls : clauses)
+        for(int i=0; i<cls.size(); ++i)
+            varPriQueue.increaseInitPri(cls.getVar(i), 1.0, cls.getSign(i));
+    for(int i=1; i<=maxVarIndex; ++i)
+        varPriQueue.increaseInitPri(i, double(rand()) / RAND_MAX);
+    varPriQueue.heapify();
+}
+
+pair<int,int> solver::pickUnassignedVar() {
     // Find next decision
     while( true ) {
         if( varPriQueue.size() == 0 )

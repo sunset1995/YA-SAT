@@ -50,6 +50,7 @@ public:
 protected:
     int unsatAfterInit = 0;
     int sat = 1;
+    int heuristicMode = HEURISTIC_VSIDS;
 
     int maxVarIndex;
     vector<Clause> clauses;
@@ -101,16 +102,13 @@ protected:
     bool isFromUIP(int vid, int sign);
 
     // Branching Heuristic
-    int staticOrderFrom;
-    vector<pii> staticOrder;
     VarHeap varPriQueue;
-    pii (solver::*pickUnassignedVar)() = NULL;
+    double varScore = 1.0;
 
     void heuristicInit_no();
     void heuristicInit_MOM();
-    pii heuristic_static();
     void heuristicInit_VSIDS();
-    pair<int,int> heuristic_VSIDS();
+    pii pickUnassignedVar();
 
 };
 
