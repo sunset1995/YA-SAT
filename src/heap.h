@@ -19,6 +19,7 @@ public:
     inline void pop();
     inline void restore(int var);
     inline void increasePri(int var, double pri, int sign);
+    inline void normMaxTo(double pri);
 
 protected:
     struct HeapEntry {
@@ -91,6 +92,15 @@ inline void VarHeap::increasePri(int var, double pri, int sign=1) {
     signCnt[id] += (sign ? 1 : -1);
     if( id <= sz )
         upward(id);
+}
+
+inline void VarHeap::normMaxTo(double pri) {
+    double x = 0;
+    for(int i=1; i<=fullSz; ++i)
+        x = max(x, arr[i].pri);
+    x = pri / x;
+    for(int i=1; i<=fullSz; ++i)
+        arr[i].pri *= x;
 }
 
 

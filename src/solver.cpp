@@ -277,6 +277,10 @@ int solver::learnFromConflict(int &vid, int &sign, int &src) {
     statistic.maxLearntSz = max(statistic.maxLearntSz, int(learnt.size()));
     statistic.totalLearntSz += learnt.size();
     if( heuristicMode == HEURISTIC_VSIDS ) {
+        if( statistic.learnCls % 10000 == 0 ) {
+            varPriQueue.normMaxTo(1.0);
+            varScore = 1.0;
+        }
         varScore *= 1.05;
         for(auto &v : learnt)
             varPriQueue.increasePri(abs(v), varScore, v>0);
