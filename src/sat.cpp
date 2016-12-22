@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <ctime>
 #include <cstring>
 #include <cstdlib>
 #include <vector>
@@ -24,6 +25,8 @@ int main(int argc, const char *argv[]) {
         helpMessage();
         exit(1);
     }
+
+    srand(time(NULL));
 
     solver yasat;
     bool statistic = false;
@@ -77,6 +80,7 @@ int main(int argc, const char *argv[]) {
         fprintf(stderr, "Max Learnt Cls Sz : %d\n", yasat.statistic.maxLearntSz);
         fprintf(stderr, "Learnt assignment : %d\n", yasat.statistic.learnAssignment);
         fprintf(stderr, "Max JumpBack      : %d\n", yasat.statistic.maxJumpBack);
+        fprintf(stderr, "Restart           : %d\n", yasat.statistic.restartTime);
         fprintf(stderr, "===========================================\n");
     }
 

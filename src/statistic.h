@@ -13,6 +13,7 @@ struct Statistic {
     int maxLearntSz = 0;
     long long totalLearntSz = 0;
     int maxJumpBack = 0;
+    int restartTime = 0;
     struct timeval start, end;
 
     // Init and start counter
@@ -21,6 +22,17 @@ struct Statistic {
         maxLearntSz = 0;
         gettimeofday(&start, 0);
         gettimeofday(&end, 0);
+    }
+
+    inline void update(const Statistic &rth) {
+        backtrackNum += rth.backtrackNum;
+        maxDepth = max(maxDepth, rth.maxDepth);
+        learnAssignment += rth.learnAssignment;
+        learnCls += rth.learnCls;
+        maxLearntSz = max(maxLearntSz, rth.maxLearntSz);
+        totalLearntSz += rth.totalLearntSz;
+        maxJumpBack = max(maxJumpBack, rth.maxJumpBack);
+        restartTime += rth.restartTime;
     }
 
     // Stop counter

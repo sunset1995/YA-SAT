@@ -38,6 +38,7 @@ public:
         LEARN_ASSIGNMENT = 11,
         LEARN_CLAUSE = 12
     };
+    static const int clauseSzThreshold = 10;
     Statistic statistic;
 
     // Init via CNF file and seperate independent subproblems
@@ -53,7 +54,9 @@ protected:
     int heuristicMode = HEURISTIC_VSIDS;
 
     int maxVarIndex;
+    int oriClsNum;
     vector<Clause> clauses;
+    vector<int> learntUnit;
     opStack var;
     int nowLevel = 0;
 
@@ -66,6 +69,7 @@ protected:
     bool set(int var, bool val, int src=-1);
     void backtrack(int lv);
     int learnFromConflict(int &vid, int &sign, int &src);
+    bool restart();
 
     bool _solve();
     int conflictingClsID = -1;

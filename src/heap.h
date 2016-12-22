@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <cstdlib>
 using namespace std;
 
 
@@ -57,6 +58,7 @@ inline int VarHeap::size() {
 }
 
 inline int VarHeap::top() {
+    if( signCnt[arr[1].var] == 0 ) return rand()%2 ? arr[1].var : -arr[1].var;
     return signCnt[arr[1].var] ? arr[1].var : -arr[1].var;
 }
 

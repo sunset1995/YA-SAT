@@ -142,6 +142,7 @@ void solver::_init(const vector< vector<int> > &rth, int maxIdx) {
             clauses.back().lit = move(cls);
         }
     }
+    oriClsNum = clauses.size();
 
     // Init two watching check list
     watchers = vector<WatcherInfo>(clauses.size()*2);
@@ -270,6 +271,7 @@ int solver::learnFromConflict(int &vid, int &sign, int &src) {
         int uip = learnt.back();
         if( !set(abs(uip), uip>0) )
             return LEARN_UNSAT;
+        learntUnit.emplace_back(uip);
         return LEARN_ASSIGNMENT;
     }
 
@@ -319,6 +321,61 @@ int solver::learnFromConflict(int &vid, int &sign, int &src) {
 }
 
 
+bool solver::restart() {
+
+    ++statistic.restartTime;
+
+    var = opStack(maxVarIndex+4);
+
+    // Eliminate clause which is too large
+    for(int i=clauses.size()-1; i>=oriClsNum; --i) {
+        if( clauses[i].size() > clauseSzThreshold ) {
+            swap(clauses[i], clauses.back());
+            clauses.pop_back();
+        }
+        else {
+            clauses[i].watcher[0] = 0;
+            clauses[i].watcher[1] = (clauses[i].size() >> 1);
+        }
+    }
+
+    // Init two watching check list
+    watchers = vector<WatcherInfo>(clauses.size()*2);
+    pos = vector<int>(maxVarIndex+4, -1);
+    neg = vector<int>(maxVarIndex+4, -1);
+    for(int cid=0, wid=-1; cid<clauses.size(); ++cid) {
+        Clause &cls = clauses[cid];
+        int id = cls.getWatchVar(0);
+        watchers[++wid] = WatcherInfo(cid, 0);
+        if( cls.getWatchSign(0) )
+            appendListWatcher(watchers, pos[id], wid);
+        else
+            appendListWatcher(watchers, neg[id], wid);
+
+        id = cls.getWatchVar(1);
+        watchers[++wid] = WatcherInfo(cid, 1);
+        if( cls.getWatchSign(1) )
+            appendListWatcher(watchers, pos[id], wid);
+        else
+            appendListWatcher(watchers, neg[id], wid);
+    }
+
+    // This solver itself is an independent subproblem
+    litMarker.init(maxVarIndex+4);
+    nowLevel = 0;
+
+    for(auto &lit : learntUnit)
+        if( !set(abs(lit), lit>0, -1) )
+            return false;
+
+    for(int i=1; i<=maxVarIndex; ++i)
+        varPriQueue.restore(i);
+
+    return true;
+
+}
+
+
 bool solver::solve(int mode) {
 
     heuristicMode = mode;
@@ -355,6 +412,7 @@ bool solver::solve(int mode) {
                 continue;
 
             subproblem[i].solve(mode);
+            statistic.update(subproblem[i].statistic);
             vector<int> result = subproblem[i].result();
             if( result[0] == 0 ) {
                 subproblem[i].printCNF();
@@ -373,6 +431,9 @@ bool solver::solve(int mode) {
 }
 
 bool solver::_solve() {
+
+    int learntMarkCls = 0;
+    int learntGoodCls = 0;
 
     // Main loop for DPLL
     while( true ) {
@@ -396,6 +457,18 @@ bool solver::_solve() {
                 return false;
             else if( learnResult == LEARN_ASSIGNMENT )
                 break;
+
+            /*if( clauses.back().size() > 10 )
+                ++learntMarkCls;
+            else
+                ++learntGoodCls;
+
+            if( learntMarkCls + learntGoodCls > 100 ) {
+                learntMarkCls = learntGoodCls = 0;
+                if( !restart() )
+                    return false;
+                break;
+            }*/
 
         }
 
