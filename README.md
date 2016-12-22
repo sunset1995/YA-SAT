@@ -5,9 +5,9 @@ Yet Another SAT Solver. Term project of PACA.
 ## Tasks
 
 ### TODO
-- High performance watcher check list
 - Iterative BCP
 - Marked Learnt Clause
+- Restart strategy
 
 ### DONE
 - 2 Literal Watching
@@ -17,6 +17,8 @@ Yet Another SAT Solver. Term project of PACA.
 - Learnt Clause Minimization
 - Split independent subproblems
 - Decision BCP result cache
+- High performance watcher check list
+- VSIDS
 
 
 ## How to
