@@ -14,9 +14,9 @@ void helpMessage() {
     puts("options: ");
     puts("  -statistic: print statitic result to stderr");
     puts("  -stdout   : print result to stdout instead of file");
-    puts("  -no       : don't use any heuristic");
-    puts("  -mom      : use MOM branching heuristic");
-    puts("  -vsids    : (default) use Variable State Independent Decaying Sum heuristic");
+    puts("  -no       : init var randomly");
+    puts("  -mom      : (default) init var score by MOM");
+    puts("  -novsids  : disable Variable State Independent Decaying Sum heuristic");
 }
 
 
@@ -30,7 +30,7 @@ int main(int argc, const char *argv[]) {
 
     solver yasat;
     bool statistic = false;
-    int mode = solver::HEURISTIC_VSIDS;
+    int mode = solver::HEURISTIC_VSIDS | solver::HEURISTIC_MOM_INIT;
 
     // Parse input parameter
     int srcid = 0, toStdout = 0;
@@ -47,13 +47,15 @@ int main(int argc, const char *argv[]) {
             toStdout = 1;
         }
         else if( strcmp(argv[i], "-no") == 0 ) {
-            mode = solver::HEURISTIC_NO;
+            mode &= ~solver::HEURISTIC_MOM_INIT;
+            mode |= solver::HEURISTIC_NO_INIT;
         }
         else if( strcmp(argv[i], "-mom") == 0 ) {
-            mode = solver::HEURISTIC_MOM;
+            mode &= ~solver::HEURISTIC_NO_INIT;
+            mode |= solver::HEURISTIC_MOM_INIT;
         }
-        else if( strcmp(argv[i], "-vsids") == 0 ) {
-            mode = solver::HEURISTIC_VSIDS;
+        else if( strcmp(argv[i], "-novsids") == 0 ) {
+            mode &= ~solver::HEURISTIC_VSIDS;
         }
         else {
             helpMessage();

@@ -31,9 +31,9 @@ public:
     typedef pair<int,int> pii;
     enum {
         INFINITE = 1023456789,
-        HEURISTIC_NO = 1011,
-        HEURISTIC_MOM = 1012,
-        HEURISTIC_VSIDS = 1014,
+        HEURISTIC_NO_INIT = 1,
+        HEURISTIC_MOM_INIT = 2,
+        HEURISTIC_VSIDS = 4,
         LEARN_UNSAT = 10,
         LEARN_ASSIGNMENT = 11,
         LEARN_CLAUSE = 12

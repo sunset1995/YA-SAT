@@ -278,7 +278,7 @@ int solver::learnFromConflict(int &vid, int &sign, int &src) {
     // Add conflict clause
     statistic.maxLearntSz = max(statistic.maxLearntSz, int(learnt.size()));
     statistic.totalLearntSz += learnt.size();
-    if( heuristicMode == HEURISTIC_VSIDS ) {
+    if( heuristicMode & HEURISTIC_VSIDS ) {
         varPriQueue.decayAll();
         for(auto &v : learnt)
             varPriQueue.increasePri(abs(v), 1.0, v>0);
@@ -365,12 +365,10 @@ bool solver::restart() {
         if( !set(abs(lit), lit>0, -1) )
             return false;
 
-    if( heuristicMode == HEURISTIC_NO )
-        heuristicInit_no();
-    else if( heuristicMode == HEURISTIC_MOM )
+    if( heuristicMode & HEURISTIC_MOM_INIT )
         heuristicInit_MOM();
-    else if( heuristicMode == HEURISTIC_VSIDS )
-        heuristicInit_VSIDS();
+    else if( heuristicMode & HEURISTIC_NO_INIT )
+        heuristicInit_no();
 
     return true;
 
@@ -392,12 +390,10 @@ bool solver::solve(int mode) {
 
         // Init for specific heuristic
         // This must be done before each subproblems
-        if( mode == HEURISTIC_NO )
-            heuristicInit_no();
-        else if( mode == HEURISTIC_MOM )
+        if( mode & HEURISTIC_MOM_INIT )
             heuristicInit_MOM();
-        else if( mode == HEURISTIC_VSIDS )
-            heuristicInit_VSIDS();
+        else if( mode & HEURISTIC_NO_INIT )
+            heuristicInit_no();
         else {
             fprintf(stderr, "Unknown solver mode\n");
             exit(1);
