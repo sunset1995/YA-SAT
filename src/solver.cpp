@@ -462,7 +462,7 @@ bool solver::_solve() {
             else if( learnResult == LEARN_ASSIGNMENT )
                 break;
 
-            /*if( --rubyBomb <= 0 ) {
+            if( (heuristicMode & RESTART_RUBY) && --rubyBomb <= 0 ) {
                 rubyNow = max(1LL, rubyNext);
                 if( rubyNow>=rubyMax ) {
                     rubyMax <<= 1;
@@ -476,7 +476,7 @@ bool solver::_solve() {
                 if( !restart() )
                     return false;
                 break;
-            }*/
+            }
 
         }
 

@@ -22,6 +22,7 @@ void helpMessage() {
     puts("  -stdout   : print result to stdout instead of file");
     puts("  -no       : init var randomly");
     puts("  -mom      : (default) init var score by MOM");
+    puts("  -ruby     : use ruby sequence to restart");
     puts("  -novsids  : disable Variable State Independent Decaying Sum heuristic");
     puts("  -nomulti  : disable multi-thread running all method concurrently");
 }
@@ -38,7 +39,6 @@ void xxxWorker(WorkerAttr attr) {
     solver worker = yasat;
 
     worker.solve(attr.mode);
-    //fprintf(stderr, "%d solve done\n", attr.mode);
 
     lock_guard<std::mutex> lock(locker);
     if( !solveDone ) {
@@ -76,15 +76,21 @@ int main(int argc, const char *argv[]) {
         else if( strcmp(argv[i], "-no") == 0 ) {
             mode &= ~solver::HEURISTIC_MOM_INIT;
             mode |= solver::HEURISTIC_NO_INIT;
+            xxx = 0;
         }
         else if( strcmp(argv[i], "-mom") == 0 ) {
             mode &= ~solver::HEURISTIC_NO_INIT;
             mode |= solver::HEURISTIC_MOM_INIT;
+            xxx = 0;
         }
         else if( strcmp(argv[i], "-novsids") == 0 ) {
             mode &= ~solver::HEURISTIC_VSIDS;
         }
         else if( strcmp(argv[i], "-nomulti") == 0 ) {
+            xxx = 0;
+        }
+        else if( strcmp(argv[i], "-ruby") == 0 ) {
+            mode |= solver::RESTART_RUBY;
             xxx = 0;
         }
         else {
@@ -100,19 +106,19 @@ int main(int argc, const char *argv[]) {
 
     if( xxx && yasat.size() > 150 ) {
 
-        thread mom1(xxxWorker, WorkerAttr(
+        thread mom(xxxWorker, WorkerAttr(
             argv[srcid],
             solver::HEURISTIC_VSIDS | solver::HEURISTIC_MOM_INIT));
-        thread mom2(xxxWorker, WorkerAttr(
+        thread ruby(xxxWorker, WorkerAttr(
             argv[srcid],
-            solver::HEURISTIC_VSIDS | solver::HEURISTIC_MOM_INIT));
+            solver::HEURISTIC_VSIDS | solver::HEURISTIC_MOM_INIT | solver::RESTART_RUBY));
         thread no(xxxWorker, WorkerAttr(
             argv[srcid],
             solver::HEURISTIC_VSIDS | solver::HEURISTIC_NO_INIT));
-        if( mom1.joinable() )
-            mom1.join();
-        if( mom2.joinable() )
-            mom2.join();
+        if( mom.joinable() )
+            mom.join();
+        if( ruby.joinable() )
+            ruby.join();
         if( no.joinable() )
             no.join();
 
