@@ -17,6 +17,9 @@
 using namespace std;
 
 
+extern int solveDone;
+
+
 class solver {
 
 public:
@@ -46,6 +49,7 @@ public:
     bool solve(int mode);
     inline vector<int> result();
     inline void printCNF();
+    inline int size();
 
 
 protected:
@@ -132,6 +136,10 @@ inline void solver::printCNF() {
             printf("%d ", cls.getLit(i));
         printf("0\n");
     }
+}
+
+inline int solver::size() {
+    return maxVarIndex;
 }
 
 

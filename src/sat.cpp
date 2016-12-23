@@ -3,9 +3,15 @@
 #include <cstring>
 #include <cstdlib>
 #include <vector>
+#include <thread>
+#include <mutex>
 #include "solver.h"
 using namespace std;
 
+
+solver yasat;
+mutex locker;
+int solveDone = 0;
 
 void helpMessage() {
     puts("Unexpected parameter");
@@ -17,6 +23,28 @@ void helpMessage() {
     puts("  -no       : init var randomly");
     puts("  -mom      : (default) init var score by MOM");
     puts("  -novsids  : disable Variable State Independent Decaying Sum heuristic");
+    puts("  -nomulti  : disable multi-thread running all method concurrently");
+}
+
+
+// Worker for -xxx
+struct WorkerAttr {
+    const char *file;
+    int mode;
+    WorkerAttr(const char *file, int mode)
+    :file(file), mode(mode) {}
+};
+void xxxWorker(WorkerAttr attr) {
+    solver worker = yasat;
+
+    worker.solve(attr.mode);
+    //fprintf(stderr, "%d solve done\n", attr.mode);
+
+    lock_guard<std::mutex> lock(locker);
+    if( !solveDone ) {
+        solveDone = 1;
+        yasat = move(worker);
+    }
 }
 
 
@@ -28,17 +56,16 @@ int main(int argc, const char *argv[]) {
 
     srand(time(NULL));
 
-    solver yasat;
     bool statistic = false;
-    int mode = solver::HEURISTIC_VSIDS | solver::HEURISTIC_MOM_INIT;
+    long mode = solver::HEURISTIC_VSIDS | solver::HEURISTIC_MOM_INIT;
 
     // Parse input parameter
-    int srcid = 0, toStdout = 0;
+    int srcid = 0, toStdout = 0, xxx = 1;
     for(int i=1, init=false; i<argc; ++i)
         if( argv[i][0] != '-' && !init ) {
             init = true;
             srcid = i;
-            yasat.init(argv[i]);
+            yasat.init(argv[srcid]);
         }
         else if( strcmp(argv[i], "-statistic") == 0 ) {
             statistic = true;
@@ -57,6 +84,9 @@ int main(int argc, const char *argv[]) {
         else if( strcmp(argv[i], "-novsids") == 0 ) {
             mode &= ~solver::HEURISTIC_VSIDS;
         }
+        else if( strcmp(argv[i], "-nomulti") == 0 ) {
+            xxx = 0;
+        }
         else {
             helpMessage();
             exit(1);
@@ -68,7 +98,28 @@ int main(int argc, const char *argv[]) {
     }
 
 
-    yasat.solve(mode);
+    if( xxx && yasat.size() > 150 ) {
+
+        thread mom1(xxxWorker, WorkerAttr(
+            argv[srcid],
+            solver::HEURISTIC_VSIDS | solver::HEURISTIC_MOM_INIT));
+        thread mom2(xxxWorker, WorkerAttr(
+            argv[srcid],
+            solver::HEURISTIC_VSIDS | solver::HEURISTIC_MOM_INIT));
+        thread no(xxxWorker, WorkerAttr(
+            argv[srcid],
+            solver::HEURISTIC_VSIDS | solver::HEURISTIC_NO_INIT));
+        if( mom1.joinable() )
+            mom1.join();
+        if( mom2.joinable() )
+            mom2.join();
+        if( no.joinable() )
+            no.join();
+
+    }
+    else {
+        yasat.solve(mode);
+    }
 
 
     // Print result

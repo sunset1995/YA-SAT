@@ -175,6 +175,8 @@ void solver::_init(const vector< vector<int> > &rth, int maxIdx) {
 // Assign id=val@nowLevel and run BCP recursively
 bool solver::set(int id, bool val, int src) {
 
+    if( solveDone ) return false;
+
     // If id is already set, check consistency
     if( var.getVal(id) != 2 ) {
         conflictingClsID = -1;
@@ -428,7 +430,12 @@ bool solver::solve(int mode) {
 
 bool solver::_solve() {
 
-    int learntCls = 0;
+    static const long long rubyFactor = 100;
+    long long rubyMax = 2;
+    long long rubyNow = 1;
+    long long rubyNext = 1;
+    long long rubyBomb = rubyNow * rubyFactor;
+
 
     // Main loop for DPLL
     while( true ) {
@@ -444,6 +451,8 @@ bool solver::_solve() {
 
         while( !set(vid, sign, src) ) {
 
+            if( solveDone ) return false;
+
             if( conflictingClsID == -1 )
                 return false;
 
@@ -453,8 +462,17 @@ bool solver::_solve() {
             else if( learnResult == LEARN_ASSIGNMENT )
                 break;
 
-            /*if( ++learntCls > 100 ) {
-                learntCls = 0;
+            /*if( --rubyBomb <= 0 ) {
+                rubyNow = max(1LL, rubyNext);
+                if( rubyNow>=rubyMax ) {
+                    rubyMax <<= 1;
+                    rubyNext = 0;
+                }
+                else {
+                    rubyNext = max(1LL, rubyNext<<1);
+                }
+
+                rubyBomb = rubyNow * rubyFactor;
                 if( !restart() )
                     return false;
                 break;
