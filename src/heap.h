@@ -49,9 +49,10 @@ protected:
 };
 
 
-inline void VarHeap::increaseInitPri(int var, double pri, int sign=1) {
+inline void VarHeap::increaseInitPri(int var, double pri, int sign=-1) {
     arr[mapping[var]].pri += pri;
-    signCnt[var] += (sign ? 1 : -1);
+    if( sign!=-1 )
+        signCnt[var] += (sign ? 1 : -1);
 }
 
 inline int VarHeap::size() {
@@ -92,10 +93,11 @@ inline void VarHeap::restore(int var) {
     upward(sz);
 }
 
-inline void VarHeap::increasePri(int var, double pri, int sign=1) {
+inline void VarHeap::increasePri(int var, double pri, int sign=-1) {
     int id = mapping[var];
     arr[id].pri += pri;
-    signCnt[id] += (sign ? 1 : -1);
+    if( sign!=-1 )
+        signCnt[id] += (sign ? 1 : -1);
     if( id <= sz )
         upward(id);
 }
