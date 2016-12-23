@@ -38,6 +38,7 @@ public:
         HEURISTIC_MOM_INIT = 2,
         HEURISTIC_VSIDS = 4,
         RESTART_RUBY = 8,
+        RESTART_STUPID = 16,
         LEARN_UNSAT = 10,
         LEARN_ASSIGNMENT = 11,
         LEARN_CLAUSE = 12

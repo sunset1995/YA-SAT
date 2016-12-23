@@ -23,6 +23,7 @@ void helpMessage() {
     puts("  -no       : init var randomly");
     puts("  -mom      : (default) init var score by MOM");
     puts("  -ruby     : use ruby sequence to restart");
+    puts("  -stupid   : restart rapidly stupidly");
     puts("  -novsids  : disable Variable State Independent Decaying Sum heuristic");
     puts("  -nomulti  : disable multi-thread running all method concurrently");
 }
@@ -93,6 +94,10 @@ int main(int argc, const char *argv[]) {
             mode |= solver::RESTART_RUBY;
             xxx = 0;
         }
+        else if( strcmp(argv[i], "-stupid") == 0 ) {
+            mode |= solver::RESTART_STUPID;
+            xxx = 0;
+        }
         else {
             helpMessage();
             exit(1);
@@ -112,6 +117,9 @@ int main(int argc, const char *argv[]) {
         thread ruby(xxxWorker, WorkerAttr(
             argv[srcid],
             solver::HEURISTIC_VSIDS | solver::HEURISTIC_MOM_INIT | solver::RESTART_RUBY));
+        thread stupid(xxxWorker, WorkerAttr(
+            argv[srcid],
+            solver::HEURISTIC_VSIDS | solver::HEURISTIC_MOM_INIT | solver::RESTART_STUPID));
         thread no(xxxWorker, WorkerAttr(
             argv[srcid],
             solver::HEURISTIC_VSIDS | solver::HEURISTIC_NO_INIT));
@@ -119,6 +127,8 @@ int main(int argc, const char *argv[]) {
             mom.join();
         if( ruby.joinable() )
             ruby.join();
+        if( stupid.joinable() )
+            stupid.join();
         if( no.joinable() )
             no.join();
 

@@ -326,17 +326,22 @@ bool solver::restart() {
     var = opStack(maxVarIndex+4);
 
     // Eliminate clause which is too large
-    for(int i=clauses.size()-1; i>=oriClsNum; --i) {
-        if( clauses[i].size() > clauseSzThreshold ) {
-            swap(clauses[i], clauses.back());
-            clauses.pop_back();
-        }
-        else {
-            clauses[i].watcher[0] = 0;
-            clauses[i].watcher[1] = (clauses[i].size() >> 1);
-        }
+    if( heuristicMode & RESTART_STUPID ) {
+        clauses.resize(oriClsNum);
     }
-    oriClsNum = clauses.size();
+    else {
+        for(int i=clauses.size()-1; i>=oriClsNum; --i) {
+            if( clauses[i].size() > clauseSzThreshold ) {
+                swap(clauses[i], clauses.back());
+                clauses.pop_back();
+            }
+            else {
+                clauses[i].watcher[0] = 0;
+                clauses[i].watcher[1] = (clauses[i].size() >> 1);
+            }
+        }
+        oriClsNum = clauses.size();
+    }
 
     // Init two watching check list
     watchers = vector<WatcherInfo>(clauses.size()*2);
@@ -435,6 +440,7 @@ bool solver::_solve() {
     long long rubyNow = 1;
     long long rubyNext = 1;
     long long rubyBomb = rubyNow * rubyFactor;
+    int optRestart = (heuristicMode & RESTART_RUBY) || (heuristicMode & RESTART_STUPID);
 
 
     // Main loop for DPLL
@@ -462,7 +468,7 @@ bool solver::_solve() {
             else if( learnResult == LEARN_ASSIGNMENT )
                 break;
 
-            if( (heuristicMode & RESTART_RUBY) && --rubyBomb <= 0 ) {
+            if( optRestart && --rubyBomb <= 0 ) {
                 rubyNow = max(1LL, rubyNext);
                 if( rubyNow>=rubyMax ) {
                     rubyMax <<= 1;
