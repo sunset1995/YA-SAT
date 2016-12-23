@@ -583,16 +583,6 @@ void solver::heuristicInit_MOM() {
     varPriQueue.init(maxVarIndex);
     for(auto &cls : clauses)
         for(int i=0; i<cls.size(); ++i)
-            varPriQueue.increaseInitPri(cls.getVar(i), 1.0);
-    for(int i=1; i<=maxVarIndex; ++i)
-        varPriQueue.increaseInitPri(i, double(rand()) / RAND_MAX);
-    varPriQueue.heapify();
-}
-
-void solver::heuristicInit_VSIDS() {
-    varPriQueue.init(maxVarIndex);
-    for(auto &cls : clauses)
-        for(int i=0; i<cls.size(); ++i)
             varPriQueue.increaseInitPri(cls.getVar(i), 1.0, cls.getSign(i));
     for(int i=1; i<=maxVarIndex; ++i)
         varPriQueue.increaseInitPri(i, double(rand()) / RAND_MAX);
