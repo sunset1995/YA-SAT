@@ -338,6 +338,7 @@ bool solver::restart() {
             clauses[i].watcher[1] = (clauses[i].size() >> 1);
         }
     }
+    oriClsNum = clauses.size();
 
     // Init two watching check list
     watchers = vector<WatcherInfo>(clauses.size()*2);
@@ -368,8 +369,12 @@ bool solver::restart() {
         if( !set(abs(lit), lit>0, -1) )
             return false;
 
-    for(int i=1; i<=maxVarIndex; ++i)
-        varPriQueue.restore(i);
+    if( heuristicMode == HEURISTIC_NO )
+        heuristicInit_no();
+    else if( heuristicMode == HEURISTIC_MOM )
+        heuristicInit_MOM();
+    else if( heuristicMode == HEURISTIC_VSIDS )
+        heuristicInit_VSIDS();
 
     return true;
 
@@ -401,7 +406,6 @@ bool solver::solve(int mode) {
             fprintf(stderr, "Unknown solver mode\n");
             exit(1);
         }
-        varScore = 1.0;
         sat = _solve();
     }
     else {
@@ -432,8 +436,7 @@ bool solver::solve(int mode) {
 
 bool solver::_solve() {
 
-    int learntMarkCls = 0;
-    int learntGoodCls = 0;
+    int learntCls = 0;
 
     // Main loop for DPLL
     while( true ) {
@@ -458,13 +461,8 @@ bool solver::_solve() {
             else if( learnResult == LEARN_ASSIGNMENT )
                 break;
 
-            /*if( clauses.back().size() > 10 )
-                ++learntMarkCls;
-            else
-                ++learntGoodCls;
-
-            if( learntMarkCls + learntGoodCls > 100 ) {
-                learntMarkCls = learntGoodCls = 0;
+            /*if( ++learntCls > 100 ) {
+                learntCls = 0;
                 if( !restart() )
                     return false;
                 break;
@@ -600,6 +598,7 @@ void solver::heuristicInit_MOM() {
 }
 
 void solver::heuristicInit_VSIDS() {
+    varScore = 1.0;
     varPriQueue.init(maxVarIndex);
     for(auto &cls : clauses)
         for(int i=0; i<cls.size(); ++i)
