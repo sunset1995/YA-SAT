@@ -1,5 +1,5 @@
 # Optimizing flags
-FLAGS=-Wall -Wold-style-cast -Wformat=2 -ansi -pedantic -O3 -std=c++11
+FLAGS=-Wall -Wold-style-cast -Wformat=2 -ansi -pedantic -lpthread -O3 -std=c++11
 
 # List all the .o files you need to build here
 OBJS=parser.o heap.o solver.o sat.o
