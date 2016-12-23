@@ -107,7 +107,6 @@ protected:
 
     // Branching Heuristic
     VarHeap varPriQueue;
-    double varScore = 1.0;
 
     void heuristicInit_no();
     void heuristicInit_MOM();

@@ -1,6 +1,7 @@
 #include "heap.h"
 
 void VarHeap::init(int maxVarIndex) {
+    nowT = 0;
     fullSz = maxVarIndex;
     sz = 0;
     arr = vector<HeapEntry>(fullSz + 4);
@@ -15,7 +16,7 @@ void VarHeap::init(int maxVarIndex) {
 void VarHeap::upward(int id) {
     while( id>1 ) {
         int fid = id>>1;
-        if( arr[id].pri > arr[fid].pri )
+        if( getPri(id) > getPri(fid) )
             swapEntry(id, fid);
         else
             break;
@@ -27,9 +28,9 @@ void VarHeap::downward(int id) {
     while( true ) {
         int lcid = id<<1;
         int rcid = (id<<1) + 1;
-        double lpri = (lcid <= sz ? arr[lcid].pri : -1.0);
-        double rpri = (rcid <= sz ? arr[rcid].pri : -1.0);
-        if( arr[id].pri >= lpri && arr[id].pri >= rpri )
+        double lpri = (lcid <= sz ? getPri(lcid) : -1.0);
+        double rpri = (rcid <= sz ? getPri(rcid) : -1.0);
+        if( getPri(id) >= lpri && getPri(id) >= rpri )
             break;
         else if( lpri > rpri ) {
             swapEntry(id, lcid);

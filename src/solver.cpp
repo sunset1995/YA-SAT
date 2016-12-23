@@ -279,13 +279,9 @@ int solver::learnFromConflict(int &vid, int &sign, int &src) {
     statistic.maxLearntSz = max(statistic.maxLearntSz, int(learnt.size()));
     statistic.totalLearntSz += learnt.size();
     if( heuristicMode == HEURISTIC_VSIDS ) {
-        if( statistic.learnCls % 10000 == 0 ) {
-            varPriQueue.normMaxTo(1.0);
-            varScore = 1.0;
-        }
-        varScore *= 1.05;
+        varPriQueue.decayAll();
         for(auto &v : learnt)
-            varPriQueue.increasePri(abs(v), varScore, v>0);
+            varPriQueue.increasePri(abs(v), 1.0, v>0);
     }
     clauses.push_back(Clause());
     clauses.back().watcher[0] = towatch;           // Latest
@@ -598,7 +594,6 @@ void solver::heuristicInit_MOM() {
 }
 
 void solver::heuristicInit_VSIDS() {
-    varScore = 1.0;
     varPriQueue.init(maxVarIndex);
     for(auto &cls : clauses)
         for(int i=0; i<cls.size(); ++i)

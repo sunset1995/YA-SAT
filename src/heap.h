@@ -4,6 +4,7 @@
 #include <vector>
 #include <algorithm>
 #include <cstdlib>
+#include <cmath>
 using namespace std;
 
 
@@ -21,17 +22,20 @@ public:
     inline int litBalance(int var);
     inline void restore(int var);
     inline void increasePri(int var, double pri, int sign);
-    inline void normMaxTo(double pri);
+    inline void decayAll();
+    constexpr static const double decayFactor = 0.9;
 
 protected:
     struct HeapEntry {
         double pri = 0;
         int var = 0;
+        int lastEvalT = 0;
         HeapEntry() 
-        :pri(0), var(0) {};
+        :pri(0), var(0), lastEvalT(0) {};
         HeapEntry(double pri, int var)
-        :pri(pri), var(var) {}
+        :pri(pri), var(var), lastEvalT(0) {}
     };
+    int nowT = 0;
     
     // Array as heap
     vector<HeapEntry> arr;
@@ -45,6 +49,10 @@ protected:
     // Function maintaining heap property
     void upward(int id);
     void downward(int id);
+
+    // Helper function
+    inline double getPri(int id);
+    inline void addPri(int id, double pri);
 
 };
 
@@ -61,6 +69,10 @@ inline int VarHeap::size() {
 
 inline int VarHeap::top() {
     return arr[1].var;
+}
+
+inline void VarHeap::decayAll() {
+    ++nowT;
 }
 
 inline void VarHeap::swapEntry(int aid, int bid) {
@@ -95,20 +107,23 @@ inline void VarHeap::restore(int var) {
 
 inline void VarHeap::increasePri(int var, double pri, int sign=-1) {
     int id = mapping[var];
-    arr[id].pri += pri;
+    addPri(id, pri);
     if( sign!=-1 )
         signCnt[id] += (sign ? 1 : -1);
     if( id <= sz )
         upward(id);
 }
 
-inline void VarHeap::normMaxTo(double pri) {
-    double x = 0;
-    for(int i=1; i<=fullSz; ++i)
-        x = max(x, arr[i].pri);
-    x = pri / x;
-    for(int i=1; i<=fullSz; ++i)
-        arr[i].pri *= x;
+inline double VarHeap::getPri(int id) {
+    if( arr[id].lastEvalT != nowT ) {
+        arr[id].pri *= pow(decayFactor, nowT - arr[id].lastEvalT);
+        arr[id].lastEvalT = nowT;
+    }
+    return arr[id].pri;
+}
+
+inline void VarHeap::addPri(int id, double pri) {
+    arr[id].pri = getPri(id) + pri;
 }
 
 
