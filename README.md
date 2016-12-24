@@ -74,6 +74,7 @@ Beside testcases provied by PACA, I also test online benchmarks from [SATLIB](ht
 
 ### Elapsed time
 Only time took by SAT solver is counted, excluding parsing time, init time.  
+
 | Scale          |          basic |          vsids |         multi |    minisat |
 | -------------- | -------------: | -------------: | ------------: | ---------: |
 | sat-20-91      |      0.00/0.00 |      0.00/0.00 |     0.00/0.00 |  0.00/0.01 |
@@ -93,6 +94,7 @@ Only time took by SAT solver is counted, excluding parsing time, init time.
 
 ### Backtrack num
 Compare YA-SAT multiple option.  
+
 | Scale          |                basic |               vsids |               multi |
 | -------------- | -------------------: | ------------------: | ------------------: |
 | sat-20-91      |           2.45/13.00 |          2.50/14.00 |          2.48/13.00 |
@@ -112,6 +114,7 @@ Compare YA-SAT multiple option.
 
 ### Search Tree Depth
 Compare YA-SAT multiple option.  
+
 | Scale          |       basic |       vsids |       multi |
 | -------------- | ----------: | ----------: | ----------: |
 | sat-20-91      |  6.41/16.00 |  6.38/15.00 |  6.39/17.00 |
