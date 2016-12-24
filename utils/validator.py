@@ -12,20 +12,25 @@ if 'UNSATISFIABLE' in assignment:
     print('UNSATISFIABLE')
     exit(0)
 
+ok = True
+clsok = False
 with open(sys.argv[1]) as cnf:
     for line in cnf:
         clause = line.split()
         if clause[0] == 'p' or clause[0] == 'c':
             continue
-        ok = False
         for v in clause:
-            if v in assignment:
-                ok = True
-                break
-        if not ok:
-            print(assignment)
-            print(clause)
-            print('WA')
-            exit(0)
+            if v == '0':
+                if not clsok:
+                    ok = False
+                clsok = False
+            elif v in assignment:
+                clsok = True
 
-print('AC')
+if not ok:
+    print(assignment)
+    print(clause)
+    print('WA')
+    exit(0)
+else:
+    print('AC')
