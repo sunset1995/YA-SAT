@@ -38,13 +38,42 @@ Yet Another SAT Solver. Term project of PACA.
     2. run `python3 testunsat.py`
 
 ## Result
+Run-times obtained on Intel Pentium CPU N3540 @ 2.16GHz × 4 and recored in second.  
+TLE(time limit exceed) set to 1200 seconds.  
+
+### Milestone-2 benchmark
+Run-time is compared with _minisat_  
+For those whose correct answer is SAT, the answer is checked by my validator.  
+
+| M2 testcase            | yasat | minisat-1.14 | minisat-2.2 |
+| ---------------------- | ----: | -----------: | ----------: |
+| aim-50-1_6-no-1.cnf    | 0.000 |        0.000 |       0.000 |
+| aim-50-1_6-yes1-1.cnf  | 0.000 |        0.000 |       0.000 |
+| aim-100-1_6-no-1.cnf   | 0.000 |        0.002 |       0.000 |
+| aim-100-1_6-yes1-1.cnf | 0.000 |        0.000 |       0.006 |
+| aim-200-1_6-no-1.cnf   | 0.000 |        0.000 |       0.000 |
+| aim-200-1_6-yes1-1.cnf | 0.001 |        0.000 |       0.006 |
+| dubois20.cnf           | 0.002 |        0.009 |       0.006 |
+| dubois100.cnf          | 0.019 |        0.014 |       0.013 |
+| ii8a1.cnf              | 0.000 |        0.000 |       0.000 |
+| ii16a1.cnf             | 0.006 |        0.019 |       0.020 |
+| ii32a1.cnf             | 0.012 |        0.013 |       0.020 |
+| jnh1.cnf               | 0.001 |        0.003 |       0.005 |
+| jnh10.cnf              | 0.001 |        0.003 |       0.005 |
+| jnh11.cnf              | 0.002 |        0.003 |       0.006 |
+| par8-1-c.cnf           | 0.000 |        0.000 |       0.003 |
+| par8-1.cnf             | 0.001 |        0.004 |       0.005 |
+| par16-1-c.cnf          | 0.021 |        0.033 |       0.093 |
+| par16-1.cnf            | 0.014 |        0.065 |       0.104 |
+| par32-1-c.cnf          |   TLE |          TLE |         TLE |
+| par32-1.cnf            | 0.067 |          TLE |         TLE |
+
+
 Beside testcases provied by PACA, I also test online benchmarks from [SATLIB](http://www.cs.ubc.ca/~hoos/SATLIB/benchm.html).  
 `sat-100-430` means 100 variables and 430 clauses all satisfiable.  
-Run-times obtained on Intel Pentium CPU N3540 @ 2.16GHz × 4
 
 ### Elapsed time
 Only time took by SAT solver is counted, excluding parsing time, init time.  
-
 | Scale          |          basic |          vsids |         multi |    minisat |
 | -------------- | -------------: | -------------: | ------------: | ---------: |
 | sat-20-91      |      0.00/0.00 |      0.00/0.00 |     0.00/0.00 |  0.00/0.01 |
@@ -63,6 +92,7 @@ Only time took by SAT solver is counted, excluding parsing time, init time.
 
 
 ### Backtrack num
+Compare YA-SAT multiple option.  
 | Scale          |                basic |               vsids |               multi |
 | -------------- | -------------------: | ------------------: | ------------------: |
 | sat-20-91      |           2.45/13.00 |          2.50/14.00 |          2.48/13.00 |
@@ -81,6 +111,7 @@ Only time took by SAT solver is counted, excluding parsing time, init time.
 
 
 ### Search Tree Depth
+Compare YA-SAT multiple option.  
 | Scale          |       basic |       vsids |       multi |
 | -------------- | ----------: | ----------: | ----------: |
 | sat-20-91      |  6.41/16.00 |  6.38/15.00 |  6.39/17.00 |
