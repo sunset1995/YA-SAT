@@ -44,7 +44,7 @@ void xxxWorker(WorkerAttr attr) {
     lock_guard<std::mutex> lock(locker);
     if( !solveDone ) {
         solveDone = 1;
-        yasat = move(worker);
+        yasat = worker;
     }
 }
 
