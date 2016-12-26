@@ -323,7 +323,7 @@ bool solver::restart() {
 
     ++statistic.restartTime;
 
-    var = opStack(maxVarIndex+4);
+    backtrack(0);
 
     // Eliminate clause which is too large
     if( heuristicMode & RESTART_STUPID ) {
