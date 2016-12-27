@@ -56,9 +56,12 @@ void solver::init(const char *filename) {
     // Identify independent subproblem via disjoint set
     DisjointSet dset;
     dset.init(maxVarIndex+4);
-    for(auto &cls : raw) 
+    for(auto &cls : raw) {
+        if( cls.empty() )
+            continue;
         for(int i=1,rid=abs(cls[0]); i<cls.size(); ++i)
             dset.unionSet(rid, abs(cls[i]));
+    }
 
     // Find all root of disjointset
     int nInd = 0;
@@ -166,6 +169,7 @@ void solver::_init(const vector< vector<int> > &rth, int maxIdx) {
     }
 
     // Assign and run BCP for all unit clause
+    nowLevel = 0;
     for(auto lit : unit)
         unsatAfterInit |= !set(abs(lit), lit>0);
 
