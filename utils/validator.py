@@ -17,7 +17,7 @@ clsok = False
 with open(sys.argv[1]) as cnf:
     for line in cnf:
         clause = line.split()
-        if clause[0] == 'p' or clause[0] == 'c':
+        if len(clause)==0 or clause[0] == 'p' or clause[0] == 'c':
             continue
         for v in clause:
             if v == '0':
