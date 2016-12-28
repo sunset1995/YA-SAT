@@ -5,6 +5,7 @@
 #include <vector>
 #include <thread>
 #include <mutex>
+#include "statistic.h"
 #include "solver.h"
 using namespace std;
 
@@ -12,6 +13,8 @@ using namespace std;
 solver yasat;
 mutex locker;
 int solveDone = 0;
+vector<int> result;
+Statistic statistic;
 
 void helpMessage() {
     puts("Unexpected parameter");
@@ -44,7 +47,8 @@ void xxxWorker(WorkerAttr attr) {
     lock_guard<std::mutex> lock(locker);
     if( !solveDone ) {
         solveDone = 1;
-        yasat = worker;
+        result = worker.result();
+        statistic = worker.statistic;
     }
 }
 
@@ -57,7 +61,7 @@ int main(int argc, const char *argv[]) {
 
     srand(time(NULL));
 
-    bool statistic = false;
+    bool stat = false;
     long mode = solver::HEURISTIC_VSIDS | solver::HEURISTIC_MOM_INIT;
 
     // Parse input parameter
@@ -69,7 +73,7 @@ int main(int argc, const char *argv[]) {
             yasat.init(argv[srcid]);
         }
         else if( strcmp(argv[i], "-statistic") == 0 ) {
-            statistic = true;
+            stat = true;
         }
         else if( strcmp(argv[i], "-stdout") == 0 ) {
             toStdout = 1;
@@ -135,21 +139,23 @@ int main(int argc, const char *argv[]) {
     }
     else {
         yasat.solve(mode);
+        result = yasat.result();
+        statistic = yasat.statistic;
     }
 
 
     // Print result
-    if( statistic ) {
+    if( stat ) {
         fprintf(stderr, "================ statistic ================\n");
-        fprintf(stderr, "Time on SAT solver: %.3f sec\n", yasat.statistic.elapseTime());
-        fprintf(stderr, "Backtrack num     : %d\n", yasat.statistic.backtrackNum);
-        fprintf(stderr, "Max depth         : %d\n", yasat.statistic.maxDepth);
-        fprintf(stderr, "Learnt clause     : %d\n", yasat.statistic.learnCls);
-        fprintf(stderr, "Avg Learnt Cls Sz : %.2f\n", yasat.statistic.learnCls ? double(yasat.statistic.totalLearntSz)/yasat.statistic.learnCls : 0);
-        fprintf(stderr, "Max Learnt Cls Sz : %d\n", yasat.statistic.maxLearntSz);
-        fprintf(stderr, "Learnt assignment : %d\n", yasat.statistic.learnAssignment);
-        fprintf(stderr, "Max JumpBack      : %d\n", yasat.statistic.maxJumpBack);
-        fprintf(stderr, "Restart           : %d\n", yasat.statistic.restartTime);
+        fprintf(stderr, "Time on SAT solver: %.3f sec\n", statistic.elapseTime());
+        fprintf(stderr, "Backtrack num     : %d\n", statistic.backtrackNum);
+        fprintf(stderr, "Max depth         : %d\n", statistic.maxDepth);
+        fprintf(stderr, "Learnt clause     : %d\n", statistic.learnCls);
+        fprintf(stderr, "Avg Learnt Cls Sz : %.2f\n", statistic.learnCls ? double(statistic.totalLearntSz)/statistic.learnCls : 0);
+        fprintf(stderr, "Max Learnt Cls Sz : %d\n", statistic.maxLearntSz);
+        fprintf(stderr, "Learnt assignment : %d\n", statistic.learnAssignment);
+        fprintf(stderr, "Max JumpBack      : %d\n", statistic.maxJumpBack);
+        fprintf(stderr, "Restart           : %d\n", statistic.restartTime);
         fprintf(stderr, "===========================================\n");
     }
 
@@ -174,7 +180,6 @@ int main(int argc, const char *argv[]) {
         freopen(filename, "w", stdout);
     }
 
-    vector<int> result = yasat.result();
     if( result[0] ) {
         puts("s SATISFIABLE");
         putchar('v');

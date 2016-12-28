@@ -1,7 +1,9 @@
 #ifndef __STATISTIC_H
 #define __STATISTIC_H
 
+#include <algorithm>
 #include <sys/time.h>
+using namespace std;
 
 
 struct Statistic {
