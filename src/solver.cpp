@@ -284,11 +284,6 @@ int solver::learnFromConflict(int &vid, int &sign, int &src) {
     // Add conflict clause
     statistic.maxLearntSz = max(statistic.maxLearntSz, int(learnt.size()));
     statistic.totalLearntSz += learnt.size();
-    if( heuristicMode & HEURISTIC_VSIDS ) {
-        varPriQueue.decayAll();
-        for(auto &v : learnt)
-            varPriQueue.increasePri(abs(v), 1.0, v>0);
-    }
     clauses.push_back(Clause());
     clauses.back().watcher[0] = towatch;           // Latest
     clauses.back().watcher[1] = learnt.size() - 1; // Learnt
@@ -500,6 +495,9 @@ bool solver::_solve() {
     Implementing Conflict Clause Learning Heuristic
 ******************************************************/
 vector<int> solver::firstUIP() {
+
+    if( heuristicMode & HEURISTIC_VSIDS )
+        varPriQueue.decayAll();
 
     // Init
     litMarker.clear();
