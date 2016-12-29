@@ -417,7 +417,6 @@ bool solver::solve(int mode) {
             statistic.update(subproblem[i].statistic);
             vector<int> result = subproblem[i].result();
             if( result[0] == 0 ) {
-                subproblem[i].printCNF();
                 sat = false;
                 break;
             }
