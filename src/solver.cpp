@@ -148,25 +148,7 @@ void solver::_init(const vector< vector<int> > &rth, int maxIdx) {
     oriClsNum = clauses.size();
 
     // Init two watching check list
-    watchers = vector<WatcherInfo>(clauses.size()*2);
-    pos = vector<int>(maxVarIndex+4, -1);
-    neg = vector<int>(maxVarIndex+4, -1);
-    for(int cid=0, wid=-1; cid<clauses.size(); ++cid) {
-        Clause &cls = clauses[cid];
-        int id = cls.getWatchVar(0);
-        watchers[++wid] = WatcherInfo(cid, 0);
-        if( cls.getWatchSign(0) )
-            appendListWatcher(watchers, pos[id], wid);
-        else
-            appendListWatcher(watchers, neg[id], wid);
-
-        id = cls.getWatchVar(1);
-        watchers[++wid] = WatcherInfo(cid, 1);
-        if( cls.getWatchSign(1) )
-            appendListWatcher(watchers, pos[id], wid);
-        else
-            appendListWatcher(watchers, neg[id], wid);
-    }
+    initAllWatcherList();
 
     // Assign and run BCP for all unit clause
     nowLevel = 0;
@@ -288,21 +270,8 @@ int solver::learnFromConflict(int &vid, int &sign, int &src) {
     clauses.back().watcher[0] = towatch;           // Latest
     clauses.back().watcher[1] = learnt.size() - 1; // Learnt
     clauses.back().lit = move(learnt);
-
-    int cid = clauses.size() - 1;
-    int id = clauses.back().getWatchVar(0);
-    watchers.emplace_back(WatcherInfo(cid, 0));
-    if( clauses.back().getWatchSign(0) )
-        appendListWatcher(watchers, pos[id], watchers.size()-1);
-    else
-        appendListWatcher(watchers, neg[id], watchers.size()-1);
-
-    id = clauses.back().getWatchVar(1);
-    watchers.emplace_back(WatcherInfo(cid, 1));
-    if( clauses.back().getWatchSign(1) )
-        appendListWatcher(watchers, pos[id], watchers.size()-1);
-    else
-        appendListWatcher(watchers, neg[id], watchers.size()-1);
+    watchers.resize(watchers.size()+2);
+    initWatcherList(clauses.size()-1);
 
     ++statistic.backtrackNum;
     ++statistic.learnCls;
@@ -343,25 +312,7 @@ bool solver::restart() {
     }
 
     // Init two watching check list
-    watchers = vector<WatcherInfo>(clauses.size()*2);
-    pos = vector<int>(maxVarIndex+4, -1);
-    neg = vector<int>(maxVarIndex+4, -1);
-    for(int cid=0, wid=-1; cid<clauses.size(); ++cid) {
-        Clause &cls = clauses[cid];
-        int id = cls.getWatchVar(0);
-        watchers[++wid] = WatcherInfo(cid, 0);
-        if( cls.getWatchSign(0) )
-            appendListWatcher(watchers, pos[id], wid);
-        else
-            appendListWatcher(watchers, neg[id], wid);
-
-        id = cls.getWatchVar(1);
-        watchers[++wid] = WatcherInfo(cid, 1);
-        if( cls.getWatchSign(1) )
-            appendListWatcher(watchers, pos[id], wid);
-        else
-            appendListWatcher(watchers, neg[id], wid);
-    }
+    initAllWatcherList();
 
     // This solver itself is an independent subproblem
     litMarker.init(maxVarIndex+4);
@@ -381,6 +332,34 @@ bool solver::restart() {
 }
 
 
+void solver::initAllWatcherList() {
+    watchers = vector<WatcherInfo>(clauses.size()<<1);
+    pos = vector<int>(maxVarIndex+4, -1);
+    neg = vector<int>(maxVarIndex+4, -1);
+    for(int cid=0; cid<clauses.size(); ++cid)
+        initWatcherList(cid);
+}
+
+void solver::initWatcherList(int cid) {
+    Clause &cls = clauses[cid];
+    int id = cls.getWatchVar(0);
+    int wid1 = (cid<<1);
+    int wid2 = (cid<<1) + 1;
+    watchers[wid1] = WatcherInfo(cid, 0);
+    if( cls.getWatchSign(0) )
+        appendListWatcher(watchers, pos[id], wid1);
+    else
+        appendListWatcher(watchers, neg[id], wid1);
+
+    id = cls.getWatchVar(1);
+    watchers[wid2] = WatcherInfo(cid, 1);
+    if( cls.getWatchSign(1) )
+        appendListWatcher(watchers, pos[id], wid2);
+    else
+        appendListWatcher(watchers, neg[id], wid2);
+}
+
+
 bool solver::solve(int mode) {
 
     heuristicMode = mode;
@@ -393,6 +372,11 @@ bool solver::solve(int mode) {
         // This solver itself is an independent subproblem
         litMarker.init(maxVarIndex+4);
         nowLevel = 0;
+
+        if( !preNessasaryAssignment() )
+            return sat = false;
+        if( statistic.preLearntAssignment && !simplifyClause() )
+            return sat = false;
 
         // Init for specific heuristic
         // This must be done before each subproblems
@@ -487,6 +471,83 @@ bool solver::_solve() {
     }
 
     return false;
+}
+
+
+/******************************************************
+    Preprocessing
+******************************************************/
+bool solver::preNessasaryAssignment() {
+    vector<bool> posNecessary(maxVarIndex + 4, false);
+    vector<bool> negNecessary(maxVarIndex + 4, false);
+    nowLevel = 1;
+    for(int i=1; i<=maxVarIndex; ++i) {
+
+        litMarker.clear();
+
+        if( !set(i, 0) ) posNecessary[i] = true;
+        for(int j=var._top; j>=0 && var.stk[j].lv==1; --j)
+            litMarker.set(var.stk[j].var, var.stk[j].val);
+        var.backToLevel(0);
+
+        if( !set(i, 1) ) negNecessary[i] = true;
+        for(int j=var._top; j>=0 && var.stk[j].lv==1; --j) {
+            int vid = var.stk[j].var;
+            int alt = litMarker.get(vid);
+            if( alt!=2 && alt == var.stk[j].val ) {
+                if( var.stk[j].val ) posNecessary[vid] = true;
+                else negNecessary[vid] = true;
+            }
+        }
+        var.backToLevel(0);
+
+    }
+    nowLevel = 0;
+
+    bool consistent = true;
+    for(int i=1; i<=maxVarIndex && consistent; ++i) {
+        statistic.preLearntAssignment += posNecessary[i] | negNecessary[i];
+        consistent &= !posNecessary[i] | !negNecessary[i];
+        if( posNecessary[i] ) learntUnit.emplace_back(i);
+        if( negNecessary[i] ) learntUnit.emplace_back(-i);
+    }
+    return consistent;
+}
+
+bool solver::simplifyClause() {
+    int cid=0;
+    while( cid < clauses.size() ) {
+        bool satisfied = false;
+        int lid = 0;
+        while( lid < clauses[cid].size() ) {
+            int vid = clauses[cid].getVar(lid);
+            int sign = clauses[cid].getSign(lid);
+            int now = var.getVal(vid);
+            if( now==2 ) ++lid;
+            else if( now==sign ) {
+                satisfied = true;
+                break;
+            }
+            else {
+                swap(clauses[cid].lit[lid], clauses[cid].lit.back());
+                clauses[cid].lit.pop_back();
+            }
+        }
+
+        if( clauses.empty() ) return false;
+        if( satisfied ) {
+            clauses[cid] = clauses.back();
+            clauses.pop_back();
+        }
+        else {
+            clauses[cid].watcher[0] = 0;
+            clauses[cid].watcher[1] = (clauses[cid].size() >> 1);
+            ++cid;
+        }
+    }
+    oriClsNum = clauses.size();
+    initAllWatcherList();
+    return true;
 }
 
 

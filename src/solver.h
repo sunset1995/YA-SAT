@@ -57,7 +57,7 @@ public:
 protected:
     int unsatAfterInit = 0;
     int sat = 1;
-    int heuristicMode = HEURISTIC_VSIDS;
+    int heuristicMode = HEURISTIC_VSIDS | HEURISTIC_MOM_INIT;
 
     int maxVarIndex;
     int oriClsNum;
@@ -76,11 +76,18 @@ protected:
     void backtrack(int lv);
     int learnFromConflict(int &vid, int &sign, int &src);
     bool restart();
+    void initAllWatcherList();
+    void initWatcherList(int cid);
 
     bool _solve();
     int conflictingClsID = -1;
     Lazytable litMarker;
     inline int _resolve(int clsid, int x, vector<int> &prev);
+
+
+    // Preprocess
+    bool preNessasaryAssignment();
+    bool simplifyClause();
 
 
     // Clause helper function

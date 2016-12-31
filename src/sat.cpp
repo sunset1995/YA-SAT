@@ -148,6 +148,7 @@ int main(int argc, const char *argv[]) {
     if( stat ) {
         fprintf(stderr, "================ statistic ================\n");
         fprintf(stderr, "Time on SAT solver: %.3f sec\n", statistic.elapseTime());
+        fprintf(stderr, "Pre learnt assign : %d\n", statistic.preLearntAssignment);
         fprintf(stderr, "Backtrack num     : %d\n", statistic.backtrackNum);
         fprintf(stderr, "Max depth         : %d\n", statistic.maxDepth);
         fprintf(stderr, "Learnt clause     : %d\n", statistic.learnCls);

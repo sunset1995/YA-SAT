@@ -8,6 +8,7 @@ using namespace std;
 
 struct Statistic {
 
+    int preLearntAssignment = 0;
     int backtrackNum = 0;
     int maxDepth = 0;
     int learnAssignment = 0;
@@ -20,13 +21,13 @@ struct Statistic {
 
     // Init and start counter
     inline void init() {
-        backtrackNum = maxDepth = learnAssignment = learnCls = 0;
-        maxLearntSz = 0;
+        *this = Statistic();
         gettimeofday(&start, 0);
         gettimeofday(&end, 0);
     }
 
     inline void update(const Statistic &rth) {
+        preLearntAssignment += rth.preLearntAssignment;
         backtrackNum += rth.backtrackNum;
         maxDepth = max(maxDepth, rth.maxDepth);
         learnAssignment += rth.learnAssignment;
