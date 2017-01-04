@@ -1,0 +1,98 @@
+=================== ALL UNSAT ====================
+
+-------------------unsat-50-218-------------------
+SAT 0 / UNSAT 1000 / ERROR 0 / TIMEOUT 0
+Time on SAT solver :       0.00 /       0.00
+Backtrack num      :      43.61 /     110.00
+Max depth          :       7.49 /      15.00
+Learnt clause      :      39.21 /     102.00
+Avg Learnt Cls Sz  :       4.30 /       5.64
+Max Learnt Cls Sz  :       8.08 /      12.00
+Learnt assignment  :       4.40 /       8.00
+Max JumpBack       :       2.87 /       9.00
+Restart            :       0.00 /       0.00
+
+-------------------unsat-75-325-------------------
+SAT 0 / UNSAT 100 / ERROR 0 / TIMEOUT 0
+Time on SAT solver :       0.00 /       0.01
+Backtrack num      :     134.72 /     230.00
+Max depth          :      10.37 /      15.00
+Learnt clause      :     128.87 /     222.00
+Avg Learnt Cls Sz  :       5.47 /       6.46
+Max Learnt Cls Sz  :      11.73 /      16.00
+Learnt assignment  :       5.85 /       9.00
+Max JumpBack       :       3.92 /       9.00
+Restart            :       0.00 /       0.00
+
+------------------unsat-100-430-------------------
+SAT 0 / UNSAT 1000 / ERROR 0 / TIMEOUT 0
+Time on SAT solver :       0.01 /       0.03
+Backtrack num      :     400.32 /     999.00
+Max depth          :      13.25 /      21.00
+Learnt clause      :     393.44 /     991.00
+Avg Learnt Cls Sz  :       6.78 /       8.31
+Max Learnt Cls Sz  :      15.73 /      21.00
+Learnt assignment  :       6.88 /      13.00
+Max JumpBack       :       5.10 /      13.00
+Restart            :       0.00 /       0.00
+
+------------------unsat-125-538-------------------
+SAT 0 / UNSAT 100 / ERROR 0 / TIMEOUT 0
+Time on SAT solver :       0.03 /       0.07
+Backtrack num      :    1067.08 /    2436.00
+Max depth          :      15.98 /      22.00
+Learnt clause      :    1059.17 /    2428.00
+Avg Learnt Cls Sz  :       8.02 /       9.46
+Max Learnt Cls Sz  :      19.49 /      24.00
+Learnt assignment  :       7.91 /      12.00
+Max JumpBack       :       5.97 /      12.00
+Restart            :       0.00 /       0.00
+
+------------------unsat-150-645-------------------
+SAT 0 / UNSAT 100 / ERROR 0 / TIMEOUT 0
+Time on SAT solver :       0.09 /       0.24
+Backtrack num      :    2818.44 /    6399.00
+Max depth          :      18.17 /      24.00
+Learnt clause      :    2809.22 /    6388.00
+Avg Learnt Cls Sz  :       9.27 /      10.62
+Max Learnt Cls Sz  :      23.23 /      26.00
+Learnt assignment  :       9.22 /      12.00
+Max JumpBack       :       7.11 /      13.00
+Restart            :       0.00 /       0.00
+
+------------------unsat-250-1065------------------
+SAT 0 / UNSAT 98 / ERROR 2 / TIMEOUT 0
+Time on SAT solver :      36.49 /     168.56
+Backtrack num      :  127741.50 /  329754.00
+Max depth          :      28.21 /      34.00
+Learnt clause      :  127729.44 /  329740.00
+Avg Learnt Cls Sz  :      14.04 /      15.26
+Max Learnt Cls Sz  :      39.29 /      46.00
+Learnt assignment  :      12.06 /      19.00
+Max JumpBack       :      11.21 /      23.00
+Restart            :      57.56 /      74.00
+
+-------------------unsat-sanity-------------------
+SAT 0 / UNSAT 2 / ERROR 0 / TIMEOUT 0
+Time on SAT solver :       0.00 /       0.00
+Backtrack num      :       0.00 /       0.00
+Max depth          :       0.00 /       0.00
+Learnt clause      :       0.00 /       0.00
+Avg Learnt Cls Sz  :       0.00 /       0.00
+Max Learnt Cls Sz  :       0.00 /       0.00
+Learnt assignment  :       0.00 /       0.00
+Max JumpBack       :       0.00 /       0.00
+Restart            :       0.00 /       0.00
+
+--------------------unsat-tiny--------------------
+SAT 0 / UNSAT 2 / ERROR 0 / TIMEOUT 0
+Time on SAT solver :       0.00 /       0.00
+Backtrack num      :       3.50 /       4.00
+Max depth          :       2.00 /       2.00
+Learnt clause      :       1.50 /       2.00
+Avg Learnt Cls Sz  :       2.00 /       2.00
+Max Learnt Cls Sz  :       2.00 /       2.00
+Learnt assignment  :       2.00 /       2.00
+Max JumpBack       :       1.00 /       1.00
+Restart            :       0.00 /       0.00
+==================================================
