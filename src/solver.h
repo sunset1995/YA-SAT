@@ -62,7 +62,7 @@ protected:
     int maxVarIndex;
     int oriClsNum;
     vector<Clause> clauses;
-    vector<int> learntUnit;
+    vector<int> unit;
     opStack var;
     int nowLevel = 0;
 
@@ -121,6 +121,7 @@ protected:
     // Branching Heuristic
     VarHeap varPriQueue;
 
+    void initHeuristic();
     void heuristicInit_no();
     void heuristicInit_MOM();
     void heuristicInit_VSIDS();

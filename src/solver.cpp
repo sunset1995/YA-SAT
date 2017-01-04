@@ -134,7 +134,6 @@ void solver::_init(const vector< vector<int> > &rth, int maxIdx) {
 
     // Init database with all clause which has 2 or more literal in raw database
     // Eliminate all unit clause and check whether there is empty clause
-    vector<int> unit;
     for(auto &cls : rth) {
         if( cls.empty() ) unsatAfterInit = 1;
         else if( cls.size() == 1 ) unit.emplace_back(cls[0]);
@@ -259,7 +258,7 @@ int solver::learnFromConflict(int &vid, int &sign, int &src) {
         int uip = learnt.back();
         if( !set(abs(uip), uip>0) )
             return LEARN_UNSAT;
-        learntUnit.emplace_back(uip);
+        unit.emplace_back(uip);
         return LEARN_ASSIGNMENT;
     }
 
@@ -314,18 +313,10 @@ bool solver::restart() {
     // Init two watching check list
     initAllWatcherList();
 
-    // This solver itself is an independent subproblem
     litMarker.init(maxVarIndex+4);
     nowLevel = 0;
 
-    for(auto &lit : learntUnit)
-        if( !set(abs(lit), lit>0, -1) )
-            return false;
-
-    if( heuristicMode & HEURISTIC_MOM_INIT )
-        heuristicInit_MOM();
-    else if( heuristicMode & HEURISTIC_NO_INIT )
-        heuristicInit_no();
+    initHeuristic();
 
     return true;
 
@@ -372,7 +363,6 @@ bool solver::solve(int mode) {
         // This solver itself is an independent subproblem
         litMarker.init(maxVarIndex+4);
         nowLevel = 0;
-
         if( !preNessasaryAssignment() )
             return sat = false;
         if( statistic.preLearntAssignment && !simplifyClause() )
@@ -380,14 +370,7 @@ bool solver::solve(int mode) {
 
         // Init for specific heuristic
         // This must be done before each subproblems
-        if( mode & HEURISTIC_MOM_INIT )
-            heuristicInit_MOM();
-        else if( mode & HEURISTIC_NO_INIT )
-            heuristicInit_no();
-        else {
-            fprintf(stderr, "Unknown solver mode\n");
-            exit(1);
-        }
+        initHeuristic();
         sat = _solve();
     }
     else {
@@ -508,8 +491,8 @@ bool solver::preNessasaryAssignment() {
     for(int i=1; i<=maxVarIndex && consistent; ++i) {
         statistic.preLearntAssignment += posNecessary[i] | negNecessary[i];
         consistent &= !posNecessary[i] | !negNecessary[i];
-        if( posNecessary[i] ) learntUnit.emplace_back(i);
-        if( negNecessary[i] ) learntUnit.emplace_back(-i);
+        if( posNecessary[i] ) unit.emplace_back(i);
+        if( negNecessary[i] ) unit.emplace_back(-i);
     }
     return consistent;
 }
@@ -658,6 +641,17 @@ bool solver::isFromUIP(int vid, int sign) {
 /******************************************************
     Implementing Branching Heuristic
 ******************************************************/
+void solver::initHeuristic() {
+    if( heuristicMode & HEURISTIC_MOM_INIT )
+        heuristicInit_MOM();
+    else if( heuristicMode & HEURISTIC_NO_INIT )
+        heuristicInit_no();
+    else {
+        fprintf(stderr, "Unknown solver mode\n");
+        exit(1);
+    }
+}
+
 void solver::heuristicInit_no() {
     varPriQueue.init(maxVarIndex);
     for(int i=1; i<=maxVarIndex; ++i)
