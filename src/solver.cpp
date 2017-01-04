@@ -51,7 +51,6 @@ void solver::init(const char *filename) {
     // Get raw clause from cnf file
     vector< vector<int> > raw;
     parse_DIMACS_CNF(raw, maxVarIndex, filename);
-    var = opStack(maxVarIndex+4);
 
     // Identify independent subproblem via disjoint set
     DisjointSet dset;
@@ -473,27 +472,81 @@ bool solver::preNessasaryAssignment() {
     vector<bool> posNecessary(maxVarIndex + 4, false);
     vector<bool> negNecessary(maxVarIndex + 4, false);
     nowLevel = 1;
+
     for(int i=1; i<=maxVarIndex; ++i) {
 
         litMarker.clear();
 
+        // Unsatisfiability-Based Necessary Assignments
+        var.backToLevel(0);
         if( !set(i, 0) ) posNecessary[i] = true;
         for(int j=var._top; j>=0 && var.stk[j].lv==1; --j)
             litMarker.set(var.stk[j].var, var.stk[j].val);
-        var.backToLevel(0);
 
+        // Unsatisfiability-Based Necessary Assignments
+        var.backToLevel(0);
         if( !set(i, 1) ) negNecessary[i] = true;
         for(int j=var._top; j>=0 && var.stk[j].lv==1; --j) {
             int vid = var.stk[j].var;
             int alt = litMarker.get(vid);
-            if( alt!=2 && alt == var.stk[j].val ) {
+            if( alt!=-1 && alt == var.stk[j].val ) {
+                // Satisfiability-Based Necessary Assignments
                 if( var.stk[j].val ) posNecessary[vid] = true;
                 else negNecessary[vid] = true;
             }
         }
-        var.backToLevel(0);
 
     }
+
+    // Satisfiability-Based Necessary Assignments
+    Lazytable posSet, negSet;
+    posSet.init(maxVarIndex + 4);
+    negSet.init(maxVarIndex + 4);
+    for(int i=0; i<clauses.size(); ++i) {
+
+        Clause &nowCls = clauses[i];
+        posSet.clear();
+        negSet.clear();
+
+        // Init set
+        var.backToLevel(0);
+        set(nowCls.getVar(0), nowCls.getSign(0));
+        for(int k=var._top; k>=0 && var.stk[k].lv==1; --k)
+            if( var.stk[k].val ) posSet.set(var.stk[k].var, 1);
+            else negSet.set(var.stk[k].var, 1);
+
+        for(int j=1; j<nowCls.size(); ++j) {
+
+            int last = 0;
+            var.backToLevel(0);
+            set(nowCls.getVar(j), nowCls.getSign(j));
+            for(int k=var._top; k>=0 && var.stk[k].lv==1; --k) {
+                int vid = var.stk[k].var;
+                if( var.stk[k].val ) {
+                    if( posSet.get(vid) != j )
+                        continue;
+                    posSet.set(vid, j+1);
+                    ++last;
+                    if( j == clauses[i].size()-1 )
+                        posNecessary[vid] = true;
+                }
+                else {
+                    if( negSet.get(vid) != j )
+                        continue;
+                    negSet.set(var.stk[vid].var, j+1);
+                    ++last;
+                    if( j == clauses[i].size()-1 )
+                        negNecessary[vid] = true;
+                }   
+            }
+
+            if( last == 0 ) break;
+
+        }
+
+    }
+
+    var.backToLevel(0);
     nowLevel = 0;
 
     bool consistent = true;
