@@ -490,9 +490,8 @@ bool solver::preNessasaryAssignment() {
     bool consistent = true;
     for(int i=1; i<=maxVarIndex && consistent; ++i) {
         statistic.preLearntAssignment += posNecessary[i] | negNecessary[i];
-        consistent &= !posNecessary[i] | !negNecessary[i];
-        if( posNecessary[i] ) unit.emplace_back(i);
-        if( negNecessary[i] ) unit.emplace_back(-i);
+        if( posNecessary[i] ) consistent &= set(i, 1);
+        if( negNecessary[i] ) consistent &= set(i, 0);
     }
     return consistent;
 }
