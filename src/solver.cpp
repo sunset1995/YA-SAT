@@ -132,6 +132,9 @@ void solver::_init(const vector< vector<int> > &rth, int maxIdx) {
     maxVarIndex = maxIdx;
     var = opStack(maxVarIndex+4);
 
+    // Init lazy table
+    litMarker.init(maxVarIndex+4);
+
     // Init database with all clause which has 2 or more literal in raw database
     // Eliminate all unit clause and check whether there is empty clause
     for(auto &cls : rth) {
@@ -313,7 +316,7 @@ bool solver::restart() {
     // Init two watching check list
     initAllWatcherList();
 
-    litMarker.init(maxVarIndex+4);
+    litMarker.clear();
     nowLevel = 0;
 
     initHeuristic();
@@ -361,11 +364,9 @@ bool solver::solve(int mode) {
 
     if( subproblem.empty() ) {
         // This solver itself is an independent subproblem
-        litMarker.init(maxVarIndex+4);
-        nowLevel = 0;
-        if( !preNessasaryAssignment() )
-            return sat = false;
-        if( statistic.preLearntAssignment && !simplifyClause() )
+
+        // Preprocessing for given problem
+        if( !preprocess() )
             return sat = false;
 
         // Init for specific heuristic
@@ -460,6 +461,14 @@ bool solver::_solve() {
 /******************************************************
     Preprocessing
 ******************************************************/
+bool solver::preprocess() {
+    if( !preNessasaryAssignment() )
+        return false;
+    if( statistic.preLearntAssignment && !simplifyClause() )
+        return false;
+    return true;
+}
+
 bool solver::preNessasaryAssignment() {
     vector<bool> posNecessary(maxVarIndex + 4, false);
     vector<bool> negNecessary(maxVarIndex + 4, false);

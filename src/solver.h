@@ -86,6 +86,7 @@ protected:
 
 
     // Preprocess
+    bool preprocess();
     bool preNessasaryAssignment();
     bool simplifyClause();
 
