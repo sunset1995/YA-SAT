@@ -477,7 +477,21 @@ bool solver::preprocess() {
         return false;
     if( statistic.preLearntAssignment && !simplifyClause() )
         return false;
-    simplifyResolve();
+
+    int sizeTwoCls = 0;
+    vector< unordered_set<int> > dict((maxVarIndex<<1) + 4);
+    for(auto &cls : clauses)
+        if( cls.size() == 2 ) {
+            int idx1 = __idx(cls.getLit(0));
+            int idx2 = __idx(cls.getLit(1));
+            dict[idx1].insert(idx2);
+            dict[idx2].insert(idx1);
+            ++sizeTwoCls;
+        }
+
+    if( sizeTwoCls )
+        simplifyResolve(dict);
+
     return true;
 }
 
@@ -610,21 +624,9 @@ bool solver::simplifyClause() {
     return true;
 }
 
-void solver::simplifyResolve() {
+void solver::simplifyResolve(vector< unordered_set<int> > &dict) {
     Statistic tmp;
     tmp.init();
-    int sizeTwoCls = 0;
-    vector< unordered_set<int> > dict((maxVarIndex<<1) + 4);
-    for(auto &cls : clauses)
-        if( cls.size() == 2 ) {
-            int idx1 = __idx(cls.getLit(0));
-            int idx2 = __idx(cls.getLit(1));
-            dict[idx1].insert(idx2);
-            dict[idx2].insert(idx1);
-            ++sizeTwoCls;
-        }
-
-    if( sizeTwoCls == 0 ) return;
 
     int id = 0;
     while( id < clauses.size() && tmp.elapseTime()<PRETLE ) {
@@ -660,7 +662,6 @@ void solver::simplifyResolve() {
     
     oriClsNum = clauses.size();
     initAllWatcherList();
-
 }
 
 

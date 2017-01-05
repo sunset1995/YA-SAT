@@ -90,7 +90,7 @@ protected:
     bool preprocess();
     bool preNessasaryAssignment();
     bool simplifyClause();
-    void simplifyResolve();
+    void simplifyResolve(vector< unordered_set<int> > &dict);
 
 
     // Clause helper function
