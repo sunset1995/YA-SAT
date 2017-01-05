@@ -9,6 +9,7 @@ using namespace std;
 struct Statistic {
 
     int preLearntAssignment = 0;
+    int preLearntClause = 0;
     int preEliminateCls = 0;
     int preEliminateLit = 0;
     int backtrackNum = 0;
@@ -19,6 +20,7 @@ struct Statistic {
     long long totalLearntSz = 0;
     int maxJumpBack = 0;
     int restartTime = 0;
+    bool stopped = false;
     struct timeval start, end;
 
     // Init and start counter
@@ -30,6 +32,7 @@ struct Statistic {
 
     inline void update(const Statistic &rth) {
         preLearntAssignment += rth.preLearntAssignment;
+        preLearntClause += rth.preLearntClause;
         preEliminateCls += rth.preEliminateCls;
         preEliminateLit += rth.preEliminateLit;
         backtrackNum += rth.backtrackNum;
@@ -44,11 +47,14 @@ struct Statistic {
 
     // Stop counter
     inline void stopTimer() {
+        stopped = true;
         gettimeofday(&end, 0);
     }
 
     // Return actual elapsed time(not cpu time) in seconds
     inline double elapseTime() {
+        if( !stopped )
+            gettimeofday(&end, 0);
         int sec = end.tv_sec - start.tv_sec;
         int usec = end.tv_usec - start.tv_usec;
         return sec + (usec/1000000.0);

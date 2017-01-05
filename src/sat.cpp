@@ -149,6 +149,7 @@ int main(int argc, const char *argv[]) {
         fprintf(stderr, "================ statistic ================\n");
         fprintf(stderr, "Time on SAT solver: %.3f sec\n", statistic.elapseTime());
         fprintf(stderr, "Pre learnt assign : %d\n", statistic.preLearntAssignment);
+        fprintf(stderr, "Pre learnt clause : %d\n", statistic.preLearntClause);
         fprintf(stderr, "Pre eliminate cls : %d\n", statistic.preEliminateCls);
         fprintf(stderr, "Pre eliminate lit : %d\n", statistic.preEliminateLit);
         fprintf(stderr, "Backtrack num     : %d\n", statistic.backtrackNum);

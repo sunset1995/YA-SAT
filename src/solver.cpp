@@ -45,10 +45,6 @@ static inline int __idx(int lit) {
     return (abs(lit)<<1) + (lit>0);
 }
 
-static inline int __idx(int var, int sign) {
-    return (var<<1) + (sign>0);
-}
-
 
 // Init solver with cnf file
 void solver::init(const char *filename) {
@@ -472,7 +468,6 @@ bool solver::_solve() {
     Preprocessing
 ******************************************************/
 bool solver::preprocess() {
-    return true;
     if( !preNessasaryAssignment() )
         return false;
     if( statistic.preLearntAssignment && !simplifyClause() )
@@ -492,6 +487,7 @@ bool solver::preprocess() {
     if( sizeTwoCls )
         simplifyResolve(dict);
 
+    preInferCls(dict);
     return true;
 }
 
@@ -662,6 +658,53 @@ void solver::simplifyResolve(vector< unordered_set<int> > &dict) {
     
     oriClsNum = clauses.size();
     initAllWatcherList();
+}
+
+void solver::preInferCls(vector< unordered_set<int> > &dict) {
+    Statistic tmp;
+    tmp.init();
+    vector<int> setL((maxVarIndex<<1) + 4);
+    int threshold = ceil(double(MAXPRELEARNT) / maxVarIndex);
+    nowLevel = 1;
+
+    for(int i=1, top=-1, cnt=threshold;
+            i<=maxVarIndex && tmp.elapseTime()<PRETLE;
+            ++i, top=-1, cnt=threshold) {
+
+        var.backToLevel(0);
+        set(i, 0);
+        for(int j=var._top; j>=0 && var.stk[j].lv==1; --j)
+            setL[++top] = var.stk[j].val ? var.stk[j].var : -var.stk[j].var;
+
+        if( top<=1 ) continue;
+
+        var.backToLevel(0);
+        set(i, 1);
+        for(int j=var._top; j>=0 && var.stk[j].lv==1 && cnt; --j) {
+            int rLit = var.stk[j].val ? var.stk[j].var : -var.stk[j].var;
+            int rIdx = __idx(rLit);
+            for(int k=0; k<=top; ++k) {
+                int lLit = setL[k];
+                int lIdx = __idx(lLit);
+                if( abs(lLit) == abs(rLit) ) continue;
+                if( dict[lIdx].count(rIdx) ) continue;
+                dict[lIdx].insert(rIdx);
+                ++statistic.preLearntClause;
+                clauses.push_back(Clause());
+                clauses.back().watcher[0] = 0;
+                clauses.back().watcher[1] = 1;
+                clauses.back().lit = {lLit, rLit};
+                watchers.resize(watchers.size()+2);
+                initWatcherList(clauses.size()-1);
+                if( --cnt == 0)
+                    break;
+            }
+        }
+
+    }
+
+    var.backToLevel(0);
+    nowLevel = 0;
 }
 
 

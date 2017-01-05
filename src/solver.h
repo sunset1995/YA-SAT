@@ -87,10 +87,12 @@ protected:
 
     // Preprocess
     constexpr static const double PRETLE = 0.5;
+    constexpr static const int MAXPRELEARNT = 5277;
     bool preprocess();
     bool preNessasaryAssignment();
     bool simplifyClause();
     void simplifyResolve(vector< unordered_set<int> > &dict);
+    void preInferCls(vector< unordered_set<int> > &dict);
 
 
     // Clause helper function
