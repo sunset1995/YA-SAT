@@ -86,9 +86,11 @@ protected:
 
 
     // Preprocess
+    constexpr static const double PRETLE = 0.5;
     bool preprocess();
     bool preNessasaryAssignment();
     bool simplifyClause();
+    void simplifyResolve();
 
 
     // Clause helper function

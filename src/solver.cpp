@@ -41,6 +41,14 @@ static void swapListWatcher(vector<solver::WatcherInfo> &pool, int &from, int &t
     appendListWatcher(pool, to, eleid);
 }
 
+static inline int __idx(int lit) {
+    return (abs(lit)<<1) + (lit>0);
+}
+
+static inline int __idx(int var, int sign) {
+    return (var<<1) + (sign>0);
+}
+
 
 // Init solver with cnf file
 void solver::init(const char *filename) {
@@ -464,19 +472,23 @@ bool solver::_solve() {
     Preprocessing
 ******************************************************/
 bool solver::preprocess() {
+    return true;
     if( !preNessasaryAssignment() )
         return false;
     if( statistic.preLearntAssignment && !simplifyClause() )
         return false;
+    simplifyResolve();
     return true;
 }
 
 bool solver::preNessasaryAssignment() {
+    Statistic tmp;
+    tmp.init();
     vector<bool> posNecessary(maxVarIndex + 4, false);
     vector<bool> negNecessary(maxVarIndex + 4, false);
     nowLevel = 1;
 
-    for(int i=1; i<=maxVarIndex; ++i) {
+    for(int i=1; i<=maxVarIndex && tmp.elapseTime()<PRETLE; ++i) {
 
         litMarker.clear();
 
@@ -505,7 +517,7 @@ bool solver::preNessasaryAssignment() {
     Lazytable posSet, negSet;
     posSet.init(maxVarIndex + 4);
     negSet.init(maxVarIndex + 4);
-    for(int i=0; i<clauses.size(); ++i) {
+    for(int i=0; i<clauses.size() && tmp.elapseTime()<PRETLE; ++i) {
 
         Clause &nowCls = clauses[i];
         posSet.clear();
@@ -518,7 +530,7 @@ bool solver::preNessasaryAssignment() {
             if( var.stk[k].val ) posSet.set(var.stk[k].var, 1);
             else negSet.set(var.stk[k].var, 1);
 
-        for(int j=1; j<nowCls.size(); ++j) {
+        for(int j=1; j<nowCls.size() && tmp.elapseTime()<PRETLE; ++j) {
 
             int last = 0;
             var.backToLevel(0);
@@ -596,6 +608,59 @@ bool solver::simplifyClause() {
     oriClsNum = clauses.size();
     initAllWatcherList();
     return true;
+}
+
+void solver::simplifyResolve() {
+    Statistic tmp;
+    tmp.init();
+    int sizeTwoCls = 0;
+    vector< unordered_set<int> > dict((maxVarIndex<<1) + 4);
+    for(auto &cls : clauses)
+        if( cls.size() == 2 ) {
+            int idx1 = __idx(cls.getLit(0));
+            int idx2 = __idx(cls.getLit(1));
+            dict[idx1].insert(idx2);
+            dict[idx2].insert(idx1);
+            ++sizeTwoCls;
+        }
+
+    if( sizeTwoCls == 0 ) return;
+
+    int id = 0;
+    while( id < clauses.size() && tmp.elapseTime()<PRETLE ) {
+
+        if( clauses[id].size() == 2 ) {
+            ++id;
+            continue;
+        }
+
+        // Check whether can be deleted
+        bool deletable = false;
+        for(int i=0; i<clauses[id].size() && !deletable; ++i)
+            for(int j=i+1; j<clauses[id].size(); ++j) {
+                int idx1 = __idx(clauses[id].getLit(i));
+                int idx2 = __idx(clauses[id].getLit(j));
+                if( dict[idx1].count(idx2) ) {
+                    deletable = true;
+                    break;
+                }
+            }
+
+        if( deletable ) {
+            statistic.preEliminateCls += 1;
+            statistic.preEliminateLit += clauses[id].size();
+            swap(clauses[id], clauses.back());
+            clauses.pop_back();
+            continue;
+        }
+
+        ++id;
+
+    }
+    
+    oriClsNum = clauses.size();
+    initAllWatcherList();
+
 }
 
 

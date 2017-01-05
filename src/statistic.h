@@ -9,6 +9,8 @@ using namespace std;
 struct Statistic {
 
     int preLearntAssignment = 0;
+    int preEliminateCls = 0;
+    int preEliminateLit = 0;
     int backtrackNum = 0;
     int maxDepth = 0;
     int learnAssignment = 0;
@@ -28,6 +30,8 @@ struct Statistic {
 
     inline void update(const Statistic &rth) {
         preLearntAssignment += rth.preLearntAssignment;
+        preEliminateCls += rth.preEliminateCls;
+        preEliminateLit += rth.preEliminateLit;
         backtrackNum += rth.backtrackNum;
         maxDepth = max(maxDepth, rth.maxDepth);
         learnAssignment += rth.learnAssignment;
