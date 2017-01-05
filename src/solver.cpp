@@ -153,8 +153,11 @@ void solver::_init(const vector< vector<int> > &rth, int maxIdx) {
 
     // Assign and run BCP for all unit clause
     nowLevel = 0;
-    for(auto lit : unit)
-        unsatAfterInit |= !set(abs(lit), lit>0);
+    if( unit.size() ) {
+        for(auto lit : unit)
+            unsatAfterInit |= !set(abs(lit), lit>0);
+        simplifyClause();
+    }
 
 }
 
@@ -520,6 +523,7 @@ bool solver::preNessasaryAssignment() {
             int last = 0;
             var.backToLevel(0);
             set(nowCls.getVar(j), nowCls.getSign(j));
+
             for(int k=var._top; k>=0 && var.stk[k].lv==1; --k) {
                 int vid = var.stk[k].var;
                 if( var.stk[k].val ) {
@@ -527,17 +531,17 @@ bool solver::preNessasaryAssignment() {
                         continue;
                     posSet.set(vid, j+1);
                     ++last;
-                    if( j == clauses[i].size()-1 )
+                    if( j == nowCls.size()-1 )
                         posNecessary[vid] = true;
                 }
                 else {
                     if( negSet.get(vid) != j )
                         continue;
-                    negSet.set(var.stk[vid].var, j+1);
+                    negSet.set(vid, j+1);
                     ++last;
-                    if( j == clauses[i].size()-1 )
+                    if( j == nowCls.size()-1 )
                         negNecessary[vid] = true;
-                }   
+                }
             }
 
             if( last == 0 ) break;
