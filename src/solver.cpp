@@ -486,8 +486,9 @@ bool solver::preprocess() {
 
     if( sizeTwoCls )
         simplifyResolve(dict);
-
     preInferCls(dict);
+
+    oriClsNum = clauses.size();
     return true;
 }
 
@@ -652,11 +653,33 @@ void solver::simplifyResolve(vector< unordered_set<int> > &dict) {
             continue;
         }
 
+        litMarker.clear();
+        for(int i=0; i<clauses[id].size(); ++i)
+            for(int j=i+1; j<clauses[id].size(); ++j) {
+                int idx1 = __idx(clauses[id].getLit(i));
+                int idx2 = __idx(-clauses[id].getLit(j));
+                if( dict[idx1].count(idx2) ) 
+                    litMarker.set(j, 1);
+
+                idx1 = __idx(-clauses[id].getLit(i));
+                idx2 = __idx(clauses[id].getLit(j));
+                if( dict[idx1].count(idx2) ) 
+                    litMarker.set(i, 1);
+            }
+        int num = 0;
+        for(int i=0; i<clauses[id].size(); ++i)
+            if( litMarker.get(i) != 1 )
+                clauses[id].lit[num++] = clauses[id].lit[i];
+            else
+                statistic.preEliminateLit += 1;
+        clauses[id].lit.resize(num);
+        clauses[id].watcher[0] = 0;
+        clauses[id].watcher[1] = (clauses[id].lit.size()>>1);
+
         ++id;
 
     }
-    
-    oriClsNum = clauses.size();
+
     initAllWatcherList();
 }
 
