@@ -306,16 +306,11 @@ bool solver::restart() {
         clauses.resize(oriClsNum);
     }
     else {
-        for(int i=clauses.size()-1; i>=oriClsNum; --i) {
+        for(int i=clauses.size()-1; i>=oriClsNum; --i)
             if( clauses[i].size() > clauseSzThreshold ) {
                 swap(clauses[i], clauses.back());
                 clauses.pop_back();
             }
-            else {
-                clauses[i].watcher[0] = 0;
-                clauses[i].watcher[1] = (clauses[i].size() >> 1);
-            }
-        }
         oriClsNum = clauses.size();
     }
 
@@ -336,8 +331,11 @@ void solver::initAllWatcherList() {
     watchers = vector<WatcherInfo>(clauses.size()<<1);
     pos = vector<int>(maxVarIndex+4, -1);
     neg = vector<int>(maxVarIndex+4, -1);
-    for(int cid=0; cid<clauses.size(); ++cid)
+    for(int cid=0; cid<clauses.size(); ++cid) {
+        clauses[cid].watcher[0] = 0;
+        clauses[cid].watcher[1] = (clauses[cid].size() >> 1);
         initWatcherList(cid);
+    }
 }
 
 void solver::initWatcherList(int cid) {
