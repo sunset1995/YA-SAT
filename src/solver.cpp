@@ -370,7 +370,7 @@ bool solver::solve(int mode) {
         // This solver itself is an independent subproblem
 
         // Preprocessing for given problem
-        if( !preprocess() )
+        if( (heuristicMode & PREPROCESS) && !preprocess() )
             return sat = false;
 
         // Init for specific heuristic
@@ -466,6 +466,8 @@ bool solver::_solve() {
     Preprocessing
 ******************************************************/
 bool solver::preprocess() {
+    Statistic tmp;
+    tmp.init();
     if( !preNessasaryAssignment() )
         return false;
     if( statistic.preLearntAssignment && !simplifyClause() )
@@ -486,6 +488,9 @@ bool solver::preprocess() {
         simplifyResolve(dict);
     preInferCls(dict);
 
+    tmp.stopTimer();
+    statistic.preprocessTime = tmp.elapseTime();
+
     oriClsNum = clauses.size();
     return true;
 }
@@ -498,6 +503,8 @@ bool solver::preNessasaryAssignment() {
     nowLevel = 1;
 
     for(int i=1; i<=maxVarIndex && tmp.elapseTime()<PRETLE; ++i) {
+
+        if( var.getVal(i) != 2 ) continue;
 
         litMarker.clear();
 

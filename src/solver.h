@@ -39,6 +39,7 @@ public:
         HEURISTIC_VSIDS = 4,
         RESTART_RUBY = 8,
         RESTART_STUPID = 16,
+        PREPROCESS = 32,
         LEARN_UNSAT = 10,
         LEARN_ASSIGNMENT = 11,
         LEARN_CLAUSE = 12

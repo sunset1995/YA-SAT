@@ -29,6 +29,7 @@ void helpMessage() {
     puts("  -stupid   : restart rapidly stupidly");
     puts("  -novsids  : disable Variable State Independent Decaying Sum heuristic");
     puts("  -nomulti  : disable multi-thread running all method concurrently");
+    puts("  -pre      : enable advance preprocess");
 }
 
 
@@ -102,6 +103,10 @@ int main(int argc, const char *argv[]) {
             mode |= solver::RESTART_STUPID;
             xxx = 0;
         }
+        else if( strcmp(argv[i], "-pre") == 0 ) {
+            mode |= solver::PREPROCESS;
+            xxx = 0;
+        }
         else {
             helpMessage();
             exit(1);
@@ -147,7 +152,8 @@ int main(int argc, const char *argv[]) {
     // Print result
     if( stat ) {
         fprintf(stderr, "================ statistic ================\n");
-        fprintf(stderr, "Time on SAT solver: %.3f sec\n", statistic.elapseTime());
+        fprintf(stderr, "Time on SAT solver: %.3f sec (preprocess %.2f%%)\n", statistic.elapseTime(),
+            100.0*statistic.preprocessTime/statistic.elapseTime());
         fprintf(stderr, "Pre learnt assign : %d\n", statistic.preLearntAssignment);
         fprintf(stderr, "Pre learnt clause : %d\n", statistic.preLearntClause);
         fprintf(stderr, "Pre eliminate cls : %d\n", statistic.preEliminateCls);

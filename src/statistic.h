@@ -20,6 +20,7 @@ struct Statistic {
     long long totalLearntSz = 0;
     int maxJumpBack = 0;
     int restartTime = 0;
+    double preprocessTime = 0;
     bool stopped = false;
     struct timeval start, end;
 
@@ -42,6 +43,7 @@ struct Statistic {
         maxLearntSz = max(maxLearntSz, rth.maxLearntSz);
         totalLearntSz += rth.totalLearntSz;
         maxJumpBack = max(maxJumpBack, rth.maxJumpBack);
+        preprocessTime += rth.preprocessTime;
         restartTime += rth.restartTime;
     }
 
