@@ -81,6 +81,8 @@ void solver::init(const char *filename) {
         return;
     }
 
+    var = opStack(maxVarIndex+4);
+
     // Sort via # of variables
     sort(roots.begin(), roots.end(), [&dset](const int l, const int r) {
         return dset.setSz(l) < dset.setSz(r);
@@ -381,7 +383,6 @@ bool solver::solve(int mode) {
     else {
         // Top level containing multiple subproblems
         for(int i=0; i<subproblem.size(); ++i) {
-
             if( subproblem[i].clauses.empty() )
                 continue;
 
