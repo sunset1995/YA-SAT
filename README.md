@@ -9,6 +9,7 @@ Yet Another SAT Solver. Term project of PACA.
 - Marked Learnt Clause
 - Debug for Restart strategy
 - More preprocess
+- Phase saving
 
 ### DONE
 - 2 Literal Watching
