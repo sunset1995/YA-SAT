@@ -173,7 +173,7 @@ inline int solver::_resolve(int clsid, int x, vector<int> &prev) {
         if( litMarker.get(vid) != -1 ) return -1;
         litMarker.set(vid, sign);
         if( heuristicMode & HEURISTIC_VSIDS )
-            varPriQueue.increasePri(vid, 1.0, sign);
+            varPriQueue.increasePri(vid, 1.0-VarHeap::decayFactor, sign);
         if( var.getLv(vid) == nowLevel )
             ++ret;
         else

@@ -8,10 +8,7 @@ Yet Another SAT Solver. Term project of PACA.
 - Iterative BCP
 - Marked Learnt Clause
 - Debug for Restart strategy
-- Extract random version
 - More preprocess
-- New Normalized VSIDS
-- Exponential VSIDS
 
 ### DONE
 - 2 Literal Watching
