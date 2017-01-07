@@ -7,7 +7,11 @@ Yet Another SAT Solver. Term project of PACA.
 ### TODO
 - Iterative BCP
 - Marked Learnt Clause
-- Restart strategy
+- Debug for Restart strategy
+- Extract random version
+- More preprocess
+- New Normalized VSIDS
+- Exponential VSIDS
 
 ### DONE
 - 2 Literal Watching
