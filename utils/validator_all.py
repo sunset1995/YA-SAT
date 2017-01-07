@@ -1,6 +1,7 @@
 import re
 import os
 import sys
+import time
 import subprocess
 from natsort import natsort_keygen, ns
 
@@ -14,6 +15,7 @@ SAT = 0
 UNSAT = 0
 ERROR = 0
 TIMEOUT = 0
+USERTIME = 0
 
 
 def check(cnfFile, result):
@@ -48,6 +50,7 @@ for dirname, dirnames, filenames in os.walk(sys.argv[1]):
             continue
         cnfFile = os.path.join(dirname, filename)
         print(os.path.join(filename).ljust(20, " "), end='')
+        startT = time.time()
         proc = subprocess.Popen([
             solver, '-stdout', '-statistic',
             cnfFile],
@@ -61,7 +64,10 @@ for dirname, dirnames, filenames in os.walk(sys.argv[1]):
             TIMEOUT += 1
             print('TIMEOUT\n')
             continue
+        elapsedT = time.time() - startT
         result = str(outs)
+
+        print('%-10.3f' % elapsedT, end='')
 
         if proc.returncode != 0:
             print('ERROR')
@@ -69,11 +75,14 @@ for dirname, dirnames, filenames in os.walk(sys.argv[1]):
         elif result.find('UNSATISFIABLE') != -1:
             print('UNSAT')
             UNSAT = UNSAT + 1
+            USERTIME += elapsedT
         else:
             print('SAT', 'AC' if check(cnfFile, result) else 'WA')
             SAT = SAT + 1
+            USERTIME += elapsedT
 
 
 print(" statistic ".center(70, "-"))
 print('SAT', SAT, '/ UNSAT', UNSAT, '/ ERROR', ERROR, '/ TIMEOUT', TIMEOUT)
+print('avg user time %.3f' % (USERTIME/(SAT+UNSAT)))
 print("".center(70, "="))
