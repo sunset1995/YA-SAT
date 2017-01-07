@@ -857,8 +857,10 @@ void solver::initHeuristic() {
 
 void solver::heuristicInit_no() {
     varPriQueue.init(maxVarIndex);
-    for(int i=1; i<=maxVarIndex; ++i)
-        varPriQueue.increaseInitPri(i, double(rand()) / RAND_MAX);
+    if( heuristicMode & RAND ) {
+        for(int i=1; i<=maxVarIndex; ++i)
+            varPriQueue.increaseInitPri(i, double(rand()) / RAND_MAX);
+    }
     varPriQueue.heapify();
 }
 
@@ -867,8 +869,10 @@ void solver::heuristicInit_MOM() {
     for(auto &cls : clauses)
         for(int i=0; i<cls.size(); ++i)
             varPriQueue.increaseInitPri(cls.getVar(i), 1.0, cls.getSign(i));
-    for(int i=1; i<=maxVarIndex; ++i)
-        varPriQueue.increaseInitPri(i, double(rand()) / RAND_MAX);
+    if( heuristicMode & RAND ) {
+        for(int i=1; i<=maxVarIndex; ++i)
+            varPriQueue.increaseInitPri(i, double(rand()) / RAND_MAX);
+    }
     varPriQueue.heapify();
 }
 
@@ -879,7 +883,11 @@ pair<int,int> solver::pickUnassignedVar() {
             return {-1, 0};
         int vid = varPriQueue.top();
         int num = varPriQueue.litBalance(vid);
-        int sign = num==0 ? (rand()&1) : (num>0);
+        int sign = (num>0);
+        if( num == 0 ) {
+            if( heuristicMode & POS ) sign = 1;
+            else if( heuristicMode & RAND ) sign = rand()&1;
+        }
         varPriQueue.pop();
         if( var.getVal(vid)==2 )
             return {vid, sign};

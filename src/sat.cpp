@@ -29,6 +29,8 @@ void helpMessage() {
     puts("  -stupid   : restart rapidly stupidly");
     puts("  -novsids  : disable Variable State Independent Decaying Sum heuristic");
     puts("  -nomulti  : disable multi-thread running all method concurrently");
+    puts("  -rand     : add random factor in VSISD");
+    puts("  -pos      : pick positive phase while tie");
     puts("  -pre      : enable advance preprocess");
 }
 
@@ -91,6 +93,7 @@ int main(int argc, const char *argv[]) {
         }
         else if( strcmp(argv[i], "-novsids") == 0 ) {
             mode &= ~solver::HEURISTIC_VSIDS;
+            xxx = 0;
         }
         else if( strcmp(argv[i], "-nomulti") == 0 ) {
             xxx = 0;
@@ -105,6 +108,14 @@ int main(int argc, const char *argv[]) {
         }
         else if( strcmp(argv[i], "-pre") == 0 ) {
             mode |= solver::PREPROCESS;
+            xxx = 0;
+        }
+        else if( strcmp(argv[i], "-rand") == 0 ) {
+            mode |= solver::RAND;
+            xxx = 0;
+        }
+        else if( strcmp(argv[i], "-pos") == 0 ) {
+            mode |= solver::POS;
             xxx = 0;
         }
         else {
@@ -126,20 +137,18 @@ int main(int argc, const char *argv[]) {
         thread ruby(xxxWorker, WorkerAttr(
             argv[srcid],
             solver::HEURISTIC_VSIDS | solver::HEURISTIC_MOM_INIT | solver::RESTART_RUBY));
-        thread stupid(xxxWorker, WorkerAttr(
+        thread rubyPos(xxxWorker, WorkerAttr(
             argv[srcid],
-            solver::HEURISTIC_VSIDS | solver::HEURISTIC_MOM_INIT | solver::RESTART_STUPID));
-        thread no(xxxWorker, WorkerAttr(
+            solver::HEURISTIC_VSIDS | solver::HEURISTIC_MOM_INIT | solver::RESTART_RUBY | solver::POS));
+        thread rubyRand(xxxWorker, WorkerAttr(
             argv[srcid],
-            solver::HEURISTIC_VSIDS | solver::HEURISTIC_NO_INIT));
+            solver::HEURISTIC_VSIDS | solver::HEURISTIC_MOM_INIT | solver::RESTART_RUBY | solver::RAND));
         if( mom.joinable() )
             mom.join();
         if( ruby.joinable() )
             ruby.join();
-        if( stupid.joinable() )
-            stupid.join();
-        if( no.joinable() )
-            no.join();
+        if( rubyRand.joinable() )
+            rubyRand.join();
 
     }
     else {

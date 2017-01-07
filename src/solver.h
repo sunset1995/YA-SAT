@@ -40,6 +40,8 @@ public:
         RESTART_RUBY = 8,
         RESTART_STUPID = 16,
         PREPROCESS = 32,
+        RAND = 64,
+        POS = 128,
         LEARN_UNSAT = 10,
         LEARN_ASSIGNMENT = 11,
         LEARN_CLAUSE = 12
