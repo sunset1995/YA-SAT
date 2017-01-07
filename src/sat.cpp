@@ -147,6 +147,8 @@ int main(int argc, const char *argv[]) {
             mom.join();
         if( ruby.joinable() )
             ruby.join();
+        if( rubyPos.joinable() )
+            rubyPos.join();
         if( rubyRand.joinable() )
             rubyRand.join();
 
