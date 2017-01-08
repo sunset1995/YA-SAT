@@ -147,7 +147,7 @@ int main(int argc, const char *argv[]) {
             solver::HEURISTIC_VSIDS | solver::HEURISTIC_MOM_INIT | solver::RESTART_RUBY | solver::POS));
         thread rubyRand(xxxWorker, WorkerAttr(
             argv[srcid],
-            solver::HEURISTIC_VSIDS | solver::HEURISTIC_MOM_INIT | solver::RESTART_RUBY | solver::RAND));
+            solver::HEURISTIC_VSIDS | solver::HEURISTIC_MOM_INIT | solver::RESTART_RUBY | solver::PHASESAVING));
         if( mom.joinable() )
             mom.join();
         if( ruby.joinable() )
