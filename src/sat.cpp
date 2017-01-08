@@ -29,6 +29,7 @@ void helpMessage() {
     puts("  -stupid   : restart rapidly stupidly");
     puts("  -novsids  : disable Variable State Independent Decaying Sum heuristic");
     puts("  -nomulti  : disable multi-thread running all method concurrently");
+    puts("  -phase    : phase saving");
     puts("  -rand     : add random factor in VSISD");
     puts("  -pos      : pick positive phase while tie");
     puts("  -pre      : enable advance preprocess");
@@ -116,6 +117,10 @@ int main(int argc, const char *argv[]) {
         }
         else if( strcmp(argv[i], "-pos") == 0 ) {
             mode |= solver::POS;
+            xxx = 0;
+        }
+        else if( strcmp(argv[i], "-phase") == 0 ) {
+            mode |= solver::PHASESAVING;
             xxx = 0;
         }
         else {

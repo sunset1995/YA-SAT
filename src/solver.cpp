@@ -181,6 +181,8 @@ bool solver::set(int id, bool val, int src) {
 
     // Set id=val@nowLevel
     var.set(id, val, nowLevel, src);
+    if( (heuristicMode & PHASESAVING) && src == -1 )
+        phaseRecord[id] = !phaseRecord[id];
 
     // Update 2 literal watching
     bool ret = true;
@@ -845,6 +847,8 @@ bool solver::isFromUIP(int vid, int sign) {
     Implementing Branching Heuristic
 ******************************************************/
 void solver::initHeuristic() {
+    varPriQueue.init(maxVarIndex);
+    phaseRecord = vector<int>(maxVarIndex+4, 0);
     if( heuristicMode & HEURISTIC_MOM_INIT )
         heuristicInit_MOM();
     else if( heuristicMode & HEURISTIC_NO_INIT )
@@ -856,7 +860,6 @@ void solver::initHeuristic() {
 }
 
 void solver::heuristicInit_no() {
-    varPriQueue.init(maxVarIndex);
     if( heuristicMode & RAND ) {
         for(int i=1; i<=maxVarIndex; ++i)
             varPriQueue.increaseInitPri(i, double(rand()) / RAND_MAX);
@@ -865,13 +868,16 @@ void solver::heuristicInit_no() {
 }
 
 void solver::heuristicInit_MOM() {
-    varPriQueue.init(maxVarIndex);
     for(auto &cls : clauses)
         for(int i=0; i<cls.size(); ++i)
             varPriQueue.increaseInitPri(cls.getVar(i), 1.0, cls.getSign(i));
     if( heuristicMode & RAND ) {
         for(int i=1; i<=maxVarIndex; ++i)
             varPriQueue.increaseInitPri(i, double(rand()) / RAND_MAX);
+    }
+    if( heuristicMode & PHASESAVING ) {
+        for(int i=1; i<=maxVarIndex; ++i)
+            phaseRecord[i] = pickPhase(i);
     }
     varPriQueue.heapify();
 }
@@ -882,14 +888,20 @@ pair<int,int> solver::pickUnassignedVar() {
         if( varPriQueue.size() == 0 )
             return {-1, 0};
         int vid = varPriQueue.top();
-        int num = varPriQueue.litBalance(vid);
-        int sign = (num>0);
-        if( num == 0 ) {
-            if( heuristicMode & POS ) sign = 1;
-            else if( heuristicMode & RAND ) sign = rand()&1;
-        }
         varPriQueue.pop();
         if( var.getVal(vid)==2 )
-            return {vid, sign};
+            return {vid, pickPhase(vid)};
     }
+}
+
+int solver::pickPhase(int vid) {
+    if( heuristicMode & PHASESAVING )
+        return phaseRecord[vid];
+    int num = varPriQueue.litBalance(vid);
+    int sign = (num>0);
+    if( num == 0 ) {
+        if( heuristicMode & POS ) sign = 1;
+        else if( heuristicMode & RAND ) sign = rand()&1;
+    }
+    return sign;
 }

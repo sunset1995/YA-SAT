@@ -42,6 +42,7 @@ public:
         PREPROCESS = 32,
         RAND = 64,
         POS = 128,
+        PHASESAVING = 256,
         LEARN_UNSAT = 10,
         LEARN_ASSIGNMENT = 11,
         LEARN_CLAUSE = 12
@@ -128,12 +129,14 @@ protected:
 
     // Branching Heuristic
     VarHeap varPriQueue;
+    vector<int> phaseRecord;
 
     void initHeuristic();
     void heuristicInit_no();
     void heuristicInit_MOM();
     void heuristicInit_VSIDS();
     pii pickUnassignedVar();
+    int pickPhase(int vid);
 
 };
 
