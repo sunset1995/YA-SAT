@@ -8,6 +8,8 @@ Yet Another SAT Solver. Term project of PACA.
 - Iterative BCP
 - Marked Learnt Clause
 - Debug for Restart strategy
+- Assert
+- Memory usage
 - More preprocess
 - Phase saving
 
