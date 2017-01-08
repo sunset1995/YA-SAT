@@ -137,6 +137,7 @@ protected:
     void heuristicInit_VSIDS();
     pii pickUnassignedVar();
     int pickPhase(int vid);
+    int pickBalancedPhase(int vid);
 
 };
 

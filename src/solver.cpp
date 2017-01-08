@@ -181,8 +181,8 @@ bool solver::set(int id, bool val, int src) {
 
     // Set id=val@nowLevel
     var.set(id, val, nowLevel, src);
-    if( (heuristicMode & PHASESAVING) && src == -1 )
-        phaseRecord[id] = !phaseRecord[id];
+    if( (heuristicMode & PHASESAVING) )
+        phaseRecord[id] = src == -1 ? val : !val;
 
     // Update 2 literal watching
     bool ret = true;
@@ -877,7 +877,7 @@ void solver::heuristicInit_MOM() {
     }
     if( heuristicMode & PHASESAVING ) {
         for(int i=1; i<=maxVarIndex; ++i)
-            phaseRecord[i] = pickPhase(i);
+            phaseRecord[i] = pickBalancedPhase(i);
     }
     varPriQueue.heapify();
 }
@@ -897,6 +897,10 @@ pair<int,int> solver::pickUnassignedVar() {
 int solver::pickPhase(int vid) {
     if( heuristicMode & PHASESAVING )
         return phaseRecord[vid];
+    return pickBalancedPhase(vid);
+}
+
+int solver::pickBalancedPhase(int vid) {
     int num = varPriQueue.litBalance(vid);
     int sign = (num>0);
     if( num == 0 ) {
