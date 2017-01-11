@@ -179,6 +179,8 @@ bool solver::set(int id, bool val, int src) {
         return var.getVal(id) == val;
     }
 
+    if( nowLevel == 0 ) src = -1;
+
     // Set id=val@nowLevel
     var.set(id, val, nowLevel, src);
     if( (heuristicMode & PHASESAVING) )
