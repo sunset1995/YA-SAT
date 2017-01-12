@@ -319,6 +319,7 @@ bool solver::restart() {
             }
         oriClsNum = clauses.size();
     }
+    simplifyClause();
 
     // Init two watching check list
     initAllWatcherList();
