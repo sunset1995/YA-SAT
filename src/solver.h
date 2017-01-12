@@ -48,6 +48,7 @@ public:
         LEARN_CLAUSE = 12
     };
     static const int clauseSzThreshold = 10;
+    static const int default_mode = HEURISTIC_VSIDS | HEURISTIC_MOM_INIT | RESTART_RUBY;
     Statistic statistic;
 
     // Init via CNF file and seperate independent subproblems
@@ -61,7 +62,7 @@ public:
 protected:
     int unsatAfterInit = 0;
     int sat = 1;
-    int heuristicMode = HEURISTIC_VSIDS | HEURISTIC_MOM_INIT;
+    int heuristicMode = default_mode;
 
     int maxVarIndex;
     int oriClsNum;

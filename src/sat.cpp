@@ -23,12 +23,11 @@ void helpMessage() {
     puts("options: ");
     puts("  -statistic: print statitic result to stderr");
     puts("  -stdout   : print result to stdout instead of file");
-    puts("  -no       : init var randomly");
-    puts("  -mom      : (default) init var score by MOM");
-    puts("  -ruby     : use ruby sequence to restart");
+    puts("  -nomom    : disable init var score by MOM");
+    puts("  -noruby   : disable ruby sequence to restart");
     puts("  -stupid   : restart rapidly stupidly");
     puts("  -novsids  : disable Variable State Independent Decaying Sum heuristic");
-    puts("  -nomulti  : disable multi-thread running all method concurrently");
+    puts("  -multi    : enable multi-thread running all method concurrently");
     puts("  -phase    : phase saving");
     puts("  -rand     : add random factor in VSISD");
     puts("  -pos      : pick positive phase while tie");
@@ -66,63 +65,40 @@ int main(int argc, const char *argv[]) {
     srand(time(NULL));
 
     bool stat = false;
-    long mode = solver::HEURISTIC_VSIDS | solver::HEURISTIC_MOM_INIT;
+    long mode = solver::default_mode;
 
     // Parse input parameter
-    int srcid = 0, toStdout = 0, xxx = 1;
+    int srcid = 0, toStdout = 0, xxx = 0;
     for(int i=1, init=false; i<argc; ++i)
         if( argv[i][0] != '-' && !init ) {
             init = true;
             srcid = i;
             yasat.init(argv[srcid]);
         }
-        else if( strcmp(argv[i], "-statistic") == 0 ) {
+        else if( strcmp(argv[i], "-statistic") == 0 )
             stat = true;
-        }
-        else if( strcmp(argv[i], "-stdout") == 0 ) {
+        else if( strcmp(argv[i], "-stdout") == 0 )
             toStdout = 1;
-        }
-        else if( strcmp(argv[i], "-no") == 0 ) {
+        else if( strcmp(argv[i], "-nomom") == 0 ) {
             mode &= ~solver::HEURISTIC_MOM_INIT;
             mode |= solver::HEURISTIC_NO_INIT;
-            xxx = 0;
         }
-        else if( strcmp(argv[i], "-mom") == 0 ) {
-            mode &= ~solver::HEURISTIC_NO_INIT;
-            mode |= solver::HEURISTIC_MOM_INIT;
-            xxx = 0;
-        }
-        else if( strcmp(argv[i], "-novsids") == 0 ) {
+        else if( strcmp(argv[i], "-novsids") == 0 )
             mode &= ~solver::HEURISTIC_VSIDS;
-            xxx = 0;
-        }
-        else if( strcmp(argv[i], "-nomulti") == 0 ) {
-            xxx = 0;
-        }
-        else if( strcmp(argv[i], "-ruby") == 0 ) {
-            mode |= solver::RESTART_RUBY;
-            xxx = 0;
-        }
-        else if( strcmp(argv[i], "-stupid") == 0 ) {
+        else if( strcmp(argv[i], "-multi") == 0 )
+            xxx = 1;
+        else if( strcmp(argv[i], "-noruby") == 0 )
+            mode &= ~solver::RESTART_RUBY;
+        else if( strcmp(argv[i], "-stupid") == 0 )
             mode |= solver::RESTART_STUPID;
-            xxx = 0;
-        }
-        else if( strcmp(argv[i], "-pre") == 0 ) {
+        else if( strcmp(argv[i], "-pre") == 0 )
             mode |= solver::PREPROCESS;
-            xxx = 0;
-        }
-        else if( strcmp(argv[i], "-rand") == 0 ) {
+        else if( strcmp(argv[i], "-rand") == 0 )
             mode |= solver::RAND;
-            xxx = 0;
-        }
-        else if( strcmp(argv[i], "-pos") == 0 ) {
+        else if( strcmp(argv[i], "-pos") == 0 )
             mode |= solver::POS;
-            xxx = 0;
-        }
-        else if( strcmp(argv[i], "-phase") == 0 ) {
+        else if( strcmp(argv[i], "-phase") == 0 )
             mode |= solver::PHASESAVING;
-            xxx = 0;
-        }
         else {
             helpMessage();
             exit(1);
@@ -134,7 +110,7 @@ int main(int argc, const char *argv[]) {
     }
 
 
-    if( xxx && yasat.size() > 150 ) {
+    if( xxx ) {
 
         thread mom(xxxWorker, WorkerAttr(
             argv[srcid],
@@ -168,8 +144,8 @@ int main(int argc, const char *argv[]) {
     // Print result
     if( stat ) {
         fprintf(stderr, "================ statistic ================\n");
-        fprintf(stderr, "Time on SAT solver: %.3f sec (preprocess %.2f%%)\n", statistic.elapseTime(),
-            100.0*statistic.preprocessTime/statistic.elapseTime());
+        fprintf(stderr, "Time on SAT solver: %.3f sec (preprocess %.2f%%)\n", statistic.elapseTime()
+            ,100.0*statistic.preprocessTime/statistic.elapseTime());
         fprintf(stderr, "Pre learnt assign : %d\n", statistic.preLearntAssignment);
         fprintf(stderr, "Pre learnt clause : %d\n", statistic.preLearntClause);
         fprintf(stderr, "Pre eliminate cls : %d\n", statistic.preEliminateCls);
