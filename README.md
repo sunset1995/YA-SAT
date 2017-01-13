@@ -7,8 +7,6 @@ Yet Another SAT Solver. Term project of PACA.
 ### TODO
 - Iterative BCP
 - Marked Learnt Clause
-- Debug for Restart strategy
-- Assert
 - Memory usage
 - More preprocess
 - Phase saving
@@ -21,7 +19,7 @@ Yet Another SAT Solver. Term project of PACA.
 - Learnt Clause Minimization
 - Split independent subproblems
 - Decision BCP result cache
-- High performance watcher check list
+- Circular list watcher check list
 - VSIDS
 
 
