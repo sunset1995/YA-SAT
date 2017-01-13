@@ -152,6 +152,7 @@ int main(int argc, const char *argv[]) {
         fprintf(stderr, "Pre eliminate lit : %d\n", statistic.preEliminateLit);
         fprintf(stderr, "Decision      num : %d\n", statistic.decision);
         fprintf(stderr, "Propagation   num : %d\n", statistic.propagation);
+        fprintf(stderr, "Propagation speed : %.f /sec\n", statistic.propagation/statistic.elapseTime());
         fprintf(stderr, "Removed lit   num : %d\n", statistic.removedLit);
         fprintf(stderr, "Backtrack     num : %d\n", statistic.backtrackNum);
         fprintf(stderr, "Max depth         : %d\n", statistic.maxDepth);
