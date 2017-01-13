@@ -177,7 +177,6 @@ inline int solver::_resolve(int clsid, int x, vector<int> &prev) {
         if( vid == x || litMarker.get(vid) == sign ) continue;
         if( litMarker.get(vid) != -1 ) return -1;
         litMarker.set(vid, sign);
-        phaseRecord[x] = !phaseRecord[x];
         if( heuristicMode & HEURISTIC_VSIDS )
             varPriQueue.increasePri(vid, 1.0-VarHeap::decayFactor, sign);
         if( var.getLv(vid) == nowLevel )
