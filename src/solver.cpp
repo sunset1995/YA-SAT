@@ -137,6 +137,9 @@ void solver::_init(const vector< vector<int> > &rth, int maxIdx) {
     maxVarIndex = maxIdx;
     var = opStack(maxVarIndex+4);
 
+    // Init container for learnt clause
+    nowLearnt.init((maxVarIndex<<1) + 4);
+
     // Init lazy table
     litMarker.init(maxVarIndex+4);
 
@@ -757,8 +760,8 @@ vector<int> solver::firstUIP() {
 
     // Init
     litMarker.clear();
-    vector<int> learnt;
-    int todoNum = _resolve(conflictingClsID, -1, learnt);
+    nowLearnt.clear();
+    int todoNum = _resolve(conflictingClsID, -1);
     if( todoNum == -1 )
         return vector<int>();
 
@@ -767,7 +770,7 @@ vector<int> solver::firstUIP() {
     while( todoNum > 1 ) {
         while( litMarker.get(var.stk[top].var) == -1 )
             --top;
-        int nowNum = _resolve(var.stk[top].src, var.stk[top].var, learnt);
+        int nowNum = _resolve(var.stk[top].src, var.stk[top].var);
         if( nowNum == -1 )
             return vector<int>();
         todoNum += nowNum - 1;
@@ -778,27 +781,27 @@ vector<int> solver::firstUIP() {
     while( litMarker.get(var.stk[top].var) == -1 )
         --top;
     int uip = (var.stk[top].val > 0 ? -var.stk[top].var : var.stk[top].var);
-    learnt.emplace_back(uip);
+    nowLearnt.push_back(uip);
 
     // Minimization
-    minimizeLearntCls(learnt);
+    minimizeLearntCls();
 
-    return learnt;
+    return nowLearnt;
 
 }
 
-void solver::minimizeLearntCls(vector<int> &learnt) {
+void solver::minimizeLearntCls() {
 
     // Minimize clause
     litMarker.clear();
-    for(int i=0; i<learnt.size(); ++i)
-        litMarker.set(abs(learnt[i]), learnt[i]>0);
-    vector<int> eliminateMark(learnt.size(), false);
+    for(int i=0; i<nowLearnt.size(); ++i)
+        litMarker.set(abs(nowLearnt[i]), nowLearnt[i]>0);
+    vector<int> eliminateMark(nowLearnt.size(), false);
     int eliminateNum = 0;
 
     // Check all literals in learnt clause except 1UIP
-    for(int i=learnt.size()-2; i>=0; --i) {
-        int src = var.getSrc(abs(learnt[i]));
+    for(int i=nowLearnt.size()-2; i>=0; --i) {
+        int src = var.getSrc(abs(nowLearnt[i]));
         if( src == -1 )
             continue;
 
@@ -806,7 +809,7 @@ void solver::minimizeLearntCls(vector<int> &learnt) {
         for(int j=0; j<clauses[src].size(); ++j) {
             int vid = clauses[src].getVar(j);
             int sign = clauses[src].getSign(j)>0;
-            if( abs(learnt[i])!=vid && !isFromUIP(vid, sign) ) {
+            if( abs(nowLearnt[i])!=vid && !isFromUIP(vid, sign) ) {
                 selfSubsumed = false;
                 break;
             }
@@ -819,10 +822,10 @@ void solver::minimizeLearntCls(vector<int> &learnt) {
     if( eliminateNum ) {
         statistic.removedLit += eliminateNum;
         int j = -1;
-        for(int i=0; i<learnt.size(); ++i)
+        for(int i=0; i<nowLearnt.size(); ++i)
             if( eliminateMark[i] == false )
-                learnt[++j] = learnt[i];
-        learnt.resize(j+1);
+                nowLearnt[++j] = nowLearnt[i];
+        nowLearnt.resize(j+1);
     }
 
 }

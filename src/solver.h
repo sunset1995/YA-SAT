@@ -8,6 +8,7 @@
 #include "statistic.h"
 #include "lazytable.h"
 #include "heap.h"
+#include "fixvector.h"
 #include <sys/time.h>
 #include <cmath>
 #include <cstdlib>
@@ -87,7 +88,7 @@ protected:
     bool _solve();
     int conflictingClsID = -1;
     Lazytable litMarker;
-    inline int _resolve(int clsid, int x, vector<int> &prev);
+    inline int _resolve(int clsid, int x);
 
 
     // Preprocess
@@ -124,8 +125,9 @@ protected:
     inline bool eval(const WatcherInfo &info) const;
 
     // Conflict Clause Learning Heuristic
+    FixVector<int> nowLearnt;
     vector<int> firstUIP();
-    void minimizeLearntCls(vector<int> &learnt);
+    void minimizeLearntCls();
     bool isFromUIP(int vid, int sign);
 
     // Branching Heuristic
@@ -167,7 +169,7 @@ inline int solver::size() {
 
 
 // Resolve helper
-inline int solver::_resolve(int clsid, int x, vector<int> &prev) {
+inline int solver::_resolve(int clsid, int x) {
 
     int ret = 0;
     for(int i=0; i<clauses[clsid].size(); ++i) {
@@ -182,7 +184,7 @@ inline int solver::_resolve(int clsid, int x, vector<int> &prev) {
         if( var.getLv(vid) == nowLevel )
             ++ret;
         else
-            prev.emplace_back(lit);
+            nowLearnt.push_back(lit);
     }
 
     return ret;
