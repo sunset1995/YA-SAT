@@ -137,6 +137,9 @@ void solver::_init(const vector< vector<int> > &rth, int maxIdx) {
     maxVarIndex = maxIdx;
     var = opStack(maxVarIndex+4);
 
+    // Init phase record
+    phaseRecord = vector<int>(maxVarIndex+4, 0);
+
     // Init lazy table
     litMarker.init(maxVarIndex+4);
 
@@ -183,8 +186,7 @@ bool solver::set(int id, bool val, int src) {
 
     // Set id=val@nowLevel
     var.set(id, val, nowLevel, src);
-    if( (heuristicMode & PHASESAVING) )
-        phaseRecord[id] = src == -1 ? val : !val;
+    phaseRecord[id] = val;
 
     // Update 2 literal watching
     bool ret = true;
@@ -851,7 +853,6 @@ bool solver::isFromUIP(int vid, int sign) {
 ******************************************************/
 void solver::initHeuristic() {
     varPriQueue.init(maxVarIndex);
-    phaseRecord = vector<int>(maxVarIndex+4, 0);
     if( heuristicMode & HEURISTIC_MOM_INIT )
         heuristicInit_MOM();
     else if( heuristicMode & HEURISTIC_NO_INIT )
