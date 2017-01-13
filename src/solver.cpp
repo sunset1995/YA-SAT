@@ -184,6 +184,9 @@ bool solver::set(int id, bool val, int src) {
 
     if( nowLevel == 0 ) src = -1;
 
+    statistic.decision += (src == -1);
+    statistic.propagation += (src != -1);
+
     // Set id=val@nowLevel
     var.set(id, val, nowLevel, src);
     phaseRecord[id] = val;
@@ -615,11 +618,13 @@ bool solver::simplifyClause() {
             else {
                 swap(clauses[cid].lit[lid], clauses[cid].lit.back());
                 clauses[cid].lit.pop_back();
+                ++statistic.removedLit;
             }
         }
 
         if( clauses.empty() ) return false;
         if( satisfied ) {
+            statistic.removedLit += clauses[cid].size();
             clauses[cid] = clauses.back();
             clauses.pop_back();
         }
@@ -814,6 +819,7 @@ void solver::minimizeLearntCls(vector<int> &learnt) {
         }
     }
     if( eliminateNum ) {
+        statistic.removedLit += eliminateNum;
         int j = -1;
         for(int i=0; i<learnt.size(); ++i)
             if( eliminateMark[i] == false )

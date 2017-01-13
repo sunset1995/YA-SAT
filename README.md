@@ -9,7 +9,6 @@ Yet Another SAT Solver. Term project of PACA.
 - Marked Learnt Clause
 - Memory usage
 - More preprocess
-- Phase saving
 
 ### DONE
 - 2 Literal Watching
@@ -21,6 +20,7 @@ Yet Another SAT Solver. Term project of PACA.
 - Decision BCP result cache
 - Circular list watcher check list
 - VSIDS
+- Phase saving
 
 
 ## How to

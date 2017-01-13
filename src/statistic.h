@@ -17,6 +17,9 @@ struct Statistic {
     int learnAssignment = 0;
     int learnCls = 0;
     int maxLearntSz = 0;
+    int decision = 0;
+    int propagation = 0;
+    int removedLit = 0;
     long long totalLearntSz = 0;
     int maxJumpBack = 0;
     int restartTime = 0;
@@ -41,6 +44,9 @@ struct Statistic {
         learnAssignment += rth.learnAssignment;
         learnCls += rth.learnCls;
         maxLearntSz = max(maxLearntSz, rth.maxLearntSz);
+        decision += rth.decision;
+        propagation += rth.propagation;
+        removedLit += rth.removedLit;
         totalLearntSz += rth.totalLearntSz;
         maxJumpBack = max(maxJumpBack, rth.maxJumpBack);
         preprocessTime += rth.preprocessTime;
