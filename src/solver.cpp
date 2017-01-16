@@ -142,6 +142,7 @@ void solver::_init(const vector< vector<int> > &rth, int maxIdx) {
 
     // Init lazy table
     litMarker.init(maxVarIndex+4);
+    delMarker.init(maxVarIndex+4);
 
     // Init database with all clause which has 2 or more literal in raw database
     // Eliminate all unit clause and check whether there is empty clause
@@ -812,9 +813,9 @@ void solver::minimizeLearntCls() {
 
     // Minimize clause
     litMarker.clear();
+    delMarker.clear();
     for(int i=0; i<nowLearnt.size(); ++i)
         litMarker.set(abs(nowLearnt[i]), nowLearnt[i]>0);
-    vector<int> eliminateMark(nowLearnt.size(), false);
     int eliminateNum = 0;
 
     // Check all literals in learnt clause except 1UIP
@@ -834,14 +835,14 @@ void solver::minimizeLearntCls() {
         }
         if( selfSubsumed ) {
             ++eliminateNum;
-            eliminateMark[i] = true;
+            delMarker.set(i, 1);
         }
     }
     if( eliminateNum ) {
         statistic.removedLit += eliminateNum;
         int j = -1;
         for(int i=0; i<nowLearnt.size(); ++i)
-            if( eliminateMark[i] == false )
+            if( delMarker.get(i) == -1 )
                 nowLearnt[++j] = nowLearnt[i];
         nowLearnt.resize(j+1);
     }

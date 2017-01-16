@@ -88,6 +88,7 @@ protected:
     bool _solve();
     int conflictingClsID = -1;
     Lazytable litMarker;
+    Lazytable delMarker;
     inline int _resolve(int clsid, int x);
 
 
