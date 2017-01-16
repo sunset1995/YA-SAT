@@ -188,6 +188,13 @@ bool solver::set(int id, bool val, int src) {
     statistic.decision += (src == -1);
     statistic.propagation += (src != -1);
 
+    // Update agility
+    if( src != -1 && (heuristicMode & ANRFA) ) {
+        agility *= gDecayFactor;
+        if( val != phaseRecord[id] )
+            agility += 1.0 - gDecayFactor;
+    }
+
     // Set id=val@nowLevel
     var.set(id, val, nowLevel, src);
     if( (heuristicMode & PHASESAVING) )
@@ -423,7 +430,8 @@ bool solver::_solve() {
     long long rubyNow = 1;
     long long rubyNext = 1;
     long long rubyBomb = rubyNow * rubyFactor;
-    int optRestart = (heuristicMode & RESTART_RUBY) || (heuristicMode & RESTART_STUPID);
+    const int optRestart = (heuristicMode & RESTART_RUBY) || (heuristicMode & RESTART_STUPID);
+    const int agilityBlock = (heuristicMode & ANRFA);
 
 
     // Main loop for DPLL
@@ -451,7 +459,7 @@ bool solver::_solve() {
             else if( learnResult == LEARN_ASSIGNMENT )
                 break;
 
-            if( optRestart && --rubyBomb <= 0 ) {
+            if( optRestart && --rubyBomb <= 0 && (!agilityBlock || agility < agilityThreshold) ) {
                 rubyNow = max(1LL, rubyNext);
                 if( rubyNow>=rubyMax ) {
                     rubyMax <<= 1;

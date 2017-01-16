@@ -28,6 +28,7 @@ void helpMessage() {
     puts("  -stupid   : restart rapidly stupidly");
     puts("  -novsids  : disable Variable State Independent Decaying Sum heuristic");
     puts("  -nophase  : disable phase saving");
+    puts("  -noanrfa  : disable Average Number Recently Flipped Assignments");
     puts("  -multi    : enable multi-thread running all method concurrently");
     puts("  -rand     : add random factor in VSISD");
     puts("  -pos      : pick positive phase while tie");
@@ -99,6 +100,8 @@ int main(int argc, const char *argv[]) {
             mode |= solver::POS;
         else if( strcmp(argv[i], "-nophase") == 0 )
             mode &= ~solver::PHASESAVING;
+        else if( strcmp(argv[i], "-noanrfa") == 0 )
+            mode &= ~solver::ANRFA;
         else {
             helpMessage();
             exit(1);

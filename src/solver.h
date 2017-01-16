@@ -44,12 +44,13 @@ public:
         RAND = 64,
         POS = 128,
         PHASESAVING = 256,
+        ANRFA = 512,
         LEARN_UNSAT = 10,
         LEARN_ASSIGNMENT = 11,
         LEARN_CLAUSE = 12
     };
     static const int clauseSzThreshold = 10;
-    static const int default_mode = HEURISTIC_VSIDS | HEURISTIC_MOM_INIT | RESTART_RUBY | PHASESAVING;
+    static const int default_mode = HEURISTIC_VSIDS | HEURISTIC_MOM_INIT | RESTART_RUBY | PHASESAVING | ANRFA;
     Statistic statistic;
 
     // Init via CNF file and seperate independent subproblems
@@ -142,6 +143,11 @@ protected:
     pii pickUnassignedVar();
     int pickPhase(int vid);
     int pickBalancedPhase(int vid);
+
+    // ANRFA
+    constexpr static const double gDecayFactor = 0.9999;
+    constexpr static const double agilityThreshold = 0.25;
+    double agility = 0;
 
 };
 
