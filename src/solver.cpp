@@ -639,13 +639,11 @@ bool solver::simplifyClause() {
             else {
                 swap(clauses[cid].lit[lid], clauses[cid].lit.back());
                 clauses[cid].lit.pop_back();
-                ++statistic.removedLit;
             }
         }
 
         if( clauses.empty() ) return false;
         if( satisfied ) {
-            statistic.removedLit += clauses[cid].size();
             clauses[cid] = clauses.back();
             clauses.pop_back();
         }

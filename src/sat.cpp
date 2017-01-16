@@ -153,12 +153,12 @@ int main(int argc, const char *argv[]) {
         fprintf(stderr, "Decision      num : %d\n", statistic.decision);
         fprintf(stderr, "Propagation   num : %d\n", statistic.propagation);
         fprintf(stderr, "Propagation speed : %.f /sec\n", statistic.propagation/statistic.elapseTime());
-        fprintf(stderr, "Removed lit   num : %d\n", statistic.removedLit);
         fprintf(stderr, "Backtrack     num : %d\n", statistic.backtrackNum);
         fprintf(stderr, "Max depth         : %d\n", statistic.maxDepth);
         fprintf(stderr, "Learnt clause     : %d\n", statistic.learnCls);
-        fprintf(stderr, "Avg Learnt Cls Sz : %.2f\n", statistic.learnCls ? double(statistic.totalLearntSz)/statistic.learnCls : 0);
-        fprintf(stderr, "Max Learnt Cls Sz : %d\n", statistic.maxLearntSz);
+        fprintf(stderr, "Learnt lit        : %.2f\n", statistic.learnCls ? double(statistic.totalLearntSz)/statistic.learnCls : 0);
+        fprintf(stderr, "Learnt lit max    : %d\n", statistic.maxLearntSz);
+        fprintf(stderr, "Del lit percent   : %.2f %%\n", statistic.removedLit ? 100.0*statistic.removedLit/(statistic.totalLearntSz+statistic.removedLit) : 0);
         fprintf(stderr, "Learnt assignment : %d\n", statistic.learnAssignment);
         fprintf(stderr, "Max JumpBack      : %d\n", statistic.maxJumpBack);
         fprintf(stderr, "Restart           : %d\n", statistic.restartTime);
