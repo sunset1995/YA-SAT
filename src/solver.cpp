@@ -191,7 +191,7 @@ bool solver::set(int id, bool val, int src) {
     // Set id=val@nowLevel
     var.set(id, val, nowLevel, src);
     if( (heuristicMode & PHASESAVING) )
-        phaseRecord[id] = src == -1 ? val : !val;
+        phaseRecord[id] = val;
 
     // Update 2 literal watching
     bool ret = true;

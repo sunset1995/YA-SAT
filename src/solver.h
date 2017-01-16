@@ -49,7 +49,7 @@ public:
         LEARN_CLAUSE = 12
     };
     static const int clauseSzThreshold = 10;
-    static const int default_mode = HEURISTIC_VSIDS | HEURISTIC_MOM_INIT | RESTART_RUBY;
+    static const int default_mode = HEURISTIC_VSIDS | HEURISTIC_MOM_INIT | RESTART_RUBY | PHASESAVING;
     Statistic statistic;
 
     // Init via CNF file and seperate independent subproblems
