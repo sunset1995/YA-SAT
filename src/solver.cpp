@@ -422,7 +422,11 @@ bool solver::_solve() {
     long long rubyNow = 1;
     long long rubyNext = 1;
     long long rubyBomb = rubyNow * rubyFactor;
+    int rubyProp = 0;
+    struct timeval rubyTimerS, rubyTimerE;
     int optRestart = (heuristicMode & RESTART_RUBY) || (heuristicMode & RESTART_STUPID);
+    if( optRestart )
+        gettimeofday(&rubyTimerS, 0);
 
 
     // Main loop for DPLL
@@ -451,19 +455,35 @@ bool solver::_solve() {
                 break;
 
             if( optRestart && --rubyBomb <= 0 ) {
-                rubyNow = max(1LL, rubyNext);
-                if( rubyNow>=rubyMax ) {
-                    rubyMax <<= 1;
-                    rubyNext = 0;
+
+                gettimeofday(&rubyTimerE, 0);
+                int sec = rubyTimerE.tv_sec - rubyTimerS.tv_sec;
+                int usec = rubyTimerE.tv_usec - rubyTimerS.tv_usec;
+                double props = statistic.propagation - rubyProp;
+
+                gettimeofday(&rubyTimerS, 0);
+                rubyProp = statistic.propagation;
+
+                // Prohibit restart when propagation is too slow
+                if( props / (sec + (usec/1000000.0)) < 527777 ) {
+                    rubyBomb = rubyNow * rubyFactor;
                 }
                 else {
-                    rubyNext = max(1LL, rubyNext<<1);
+                    rubyNow = max(1LL, rubyNext);
+                    if( rubyNow>=rubyMax ) {
+                        rubyMax <<= 1;
+                        rubyNext = 0;
+                    }
+                    else {
+                        rubyNext = max(1LL, rubyNext<<1);
+                    }
+
+                    rubyBomb = rubyNow * rubyFactor;
+                    if( !restart() )
+                        return false;
+                    break;
                 }
 
-                rubyBomb = rubyNow * rubyFactor;
-                if( !restart() )
-                    return false;
-                break;
             }
 
         }
