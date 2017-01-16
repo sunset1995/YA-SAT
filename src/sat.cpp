@@ -27,8 +27,8 @@ void helpMessage() {
     puts("  -noruby   : disable ruby sequence to restart");
     puts("  -stupid   : restart rapidly stupidly");
     puts("  -novsids  : disable Variable State Independent Decaying Sum heuristic");
+    puts("  -nophase  : disable phase saving");
     puts("  -multi    : enable multi-thread running all method concurrently");
-    puts("  -phase    : phase saving");
     puts("  -rand     : add random factor in VSISD");
     puts("  -pos      : pick positive phase while tie");
     puts("  -pre      : enable advance preprocess");
@@ -97,8 +97,8 @@ int main(int argc, const char *argv[]) {
             mode |= solver::RAND;
         else if( strcmp(argv[i], "-pos") == 0 )
             mode |= solver::POS;
-        else if( strcmp(argv[i], "-phase") == 0 )
-            mode |= solver::PHASESAVING;
+        else if( strcmp(argv[i], "-nophase") == 0 )
+            mode &= ~solver::PHASESAVING;
         else {
             helpMessage();
             exit(1);
