@@ -23,7 +23,7 @@ public:
     inline void restore(int var);
     inline void increasePri(int var, double pri, int sign);
     inline void decayAll();
-    constexpr static const double decayFactor = 0.9;
+    constexpr static const double decayFactor = 0.95;
 
 protected:
     struct HeapEntry {
