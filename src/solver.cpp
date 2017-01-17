@@ -144,6 +144,10 @@ void solver::_init(const vector< vector<int> > &rth, int maxIdx) {
     litMarker.init(maxVarIndex+4);
     delMarker.init(maxVarIndex+4);
 
+    // Init heuristic
+    varPriQueue.init(maxVarIndex);
+    phaseRecord = vector<int>(maxVarIndex+4, 0);
+
     // Init database with all clause which has 2 or more literal in raw database
     // Eliminate all unit clause and check whether there is empty clause
     for(auto &cls : rth) {
@@ -866,8 +870,6 @@ bool solver::isFromUIP(int vid, int sign) {
     Implementing Branching Heuristic
 ******************************************************/
 void solver::initHeuristic() {
-    varPriQueue.init(maxVarIndex);
-    phaseRecord = vector<int>(maxVarIndex+4, 0);
     if( heuristicMode & HEURISTIC_MOM_INIT )
         heuristicInit_MOM();
     else if( heuristicMode & HEURISTIC_NO_INIT )
