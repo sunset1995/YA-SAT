@@ -21,15 +21,23 @@ Yet Another SAT Solver. Term project of PACA.
 - Circular list watcher check list
 - VSIDS
 - Phase saving
+- ANRFA
 
 
 ## How to
 - To build `./build.sh`  
 - To run `./yasat [options] benchmark.cnf`  
-    - `-statistic` print statistic result to _stderr_  
-    - `-stdout` print result to stdout instead of file  
-    - `-no` don't use any heuristic  
-    - `-mom` (default) use MOM branching heuristi
+	- `-statistic` print statitic result to stderr
+    - `-stdout   ` print result to stdout instead of file
+    - `-nomom    ` disable init var score by MOM
+    - `-noruby   ` disable ruby sequence to restart
+    - `-stupid   ` restart rapidly stupidly
+    - `-novsids  ` disable Variable State Independent Decaying Sum heuristic
+    - `-nophase  ` disable phase saving
+    - `-noanrfa  ` disable Average Number Recently Flipped Assignments
+    - `-multi    ` enable multi-thread running all method concurrently
+    - `-rand     ` add random factor in VSISD
+    - `-pos      ` pick positive phase while tie
 - To run all benchmarks in *.cnf under directory `python3 test.py path-to-directory`  
 - To validate the sat result `python3 validator.py benchmark.cnf benchmark.sat`  
 - To run all SAT benchmarks  
@@ -41,10 +49,9 @@ Yet Another SAT Solver. Term project of PACA.
 
 ## Result
 Run-times obtained on Intel Pentium CPU N3540 @ 2.16GHz × 4 and recored in second.  
-TLE(time limit exceed) set to 1200 seconds.  
+TLE(time limit exceed) is set to 1200 seconds.  
 
-### Benchmark from course PACA
-Run-time is compared with _minisat_  
+### Benchmark from course PACA  
 For those whose correct answer is SAT, the answer is checked by my validator.  
 
 | M2 testcase              |      M2 |    5e3 |    704 |   416 |
@@ -107,23 +114,23 @@ For those whose correct answer is SAT, the answer is checked by my validator.
 
 
 Beside testcases provied by PACA, I also test online benchmarks from [SATLIB](http://www.cs.ubc.ca/~hoos/SATLIB/benchm.html).  
-`sat-100-430` means 100 variables and 430 clauses all satisfiable.   
+`sat-100-430` means 100 variables and 430 clauses all satisfiable. Result record in `avg/max` format.   
 
-| Scale          |         5e3 |          704 |
-| -------------- | ----------: | -----------: |
-| sat-20-91      |   0.00/0.00 |    0.00/0.00 |
-| sat-50-218     |   0.00/0.00 |    0.00/0.00 |
-| sat-75-325     |   0.00/0.01 |    0.00/0.01 |
-| sat-100-430    |   0.00/0.02 |    0.00/0.02 |
-| sat-125-538    |   0.01/0.06 |    0.01/0.05 |
-| sat-150-645    |   0.03/0.14 |    0.03/0.16 |
-| sat-250-1065   |  3.89/43.49 |   4.47/24.05 |
-| unsat-50-218   |   0.00/0.00 |    0.00/0.00 |
-| unsat-75-325   |   0.00/0.01 |    0.00/0.01 |
-| unsat-100-430  |   0.01/0.02 |    0.01/0.03 |
-| unsat-125-538  |   0.03/0.06 |    0.03/0.06 |
-| unsat-150-645  |   0.08/0.17 |    0.08/0.17 |
-| unsat-250-1065 | 23.02/79.67 | 19.95/114.28 |
+| Scale          |         5e3 |          704 |          416 |
+| -------------- | ----------: | -----------: | -----------: |
+| sat-20-91      |   0.00/0.00 |    0.00/0.00 |    0.00/0.00 |
+| sat-50-218     |   0.00/0.00 |    0.00/0.00 |    0.00/0.00 |
+| sat-75-325     |   0.00/0.01 |    0.00/0.01 |    0.00/0.01 |
+| sat-100-430    |   0.00/0.02 |    0.00/0.02 |    0.00/0.02 |
+| sat-125-538    |   0.01/0.06 |    0.01/0.05 |    0.01/0.04 |
+| sat-150-645    |   0.03/0.14 |    0.03/0.16 |    0.03/0.15 |
+| sat-250-1065   |  3.89/43.49 |   4.47/24.05 |   5.70/33.84 |
+| unsat-50-218   |   0.00/0.00 |    0.00/0.00 |    0.00/0.00 |
+| unsat-75-325   |   0.00/0.01 |    0.00/0.01 |    0.00/0.01 |
+| unsat-100-430  |   0.01/0.02 |    0.01/0.03 |    0.01/0.02 |
+| unsat-125-538  |   0.03/0.06 |    0.03/0.06 |    0.03/0.06 |
+| unsat-150-645  |   0.08/0.17 |    0.08/0.17 |    0.08/0.21 |
+| unsat-250-1065 | 23.02/79.67 | 19.95/114.28 | 29.16/111.99 |
 
 
 Also I run SAT competition 2006’s benchmark_1 and compare the result with those competitor.  
